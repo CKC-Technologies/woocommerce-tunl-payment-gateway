@@ -1,0 +1,11 @@
+.woocommerce-checkout #payment ul.payment_methods li img.card-input-img {
+    position: absolute;
+    top: 39px;
+    width: 40px;
+    right: 10px;
+    height: auto;
+}
+
+.woocommerce-checkout #payment ul.payment_methods li .cardNumberInput{
+    position: relative;
+}
