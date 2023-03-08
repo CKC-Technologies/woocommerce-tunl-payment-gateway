@@ -310,7 +310,7 @@ function initialize_tunl_class()
 				'title'       => __( 'Enable/Disable', 'tunlwoopay' ),
 				'label'       => __( 'Enable Tunl', 'tunlwoopay' ),
 				'type'        => 'checkbox',
-				'description' => __( 'This enable Tunl gateway which allow to accept payment through creadit card.', 'tunlwoopay' ),
+				'description' => __( 'Enable or disable the Tunl gateway', 'tunlwoopay' ),
 				'default'     => 'no',
 				'desc_tip'    => true,
 			);
@@ -324,7 +324,7 @@ function initialize_tunl_class()
 			$arrayfields['title'] = array(
 				'title'       => __( 'Title', 'tunlwoopay' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'tunlwoopay' ),
+				'description' => __( 'Customize the name of the payment method the user sees on the checkout page.', 'tunlwoopay' ),
 				'default'     => __( 'Tunl', 'tunlwoopay' ),
 				'desc_tip'    => true,
 			);
