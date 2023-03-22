@@ -2,17 +2,26 @@ jQuery(document).ready(function($){
 
 
     $(document).on("change keyup input","#tunl_ccno",function() { 
+        
         jQuery('.card-input-img').remove();
         var getInputFirst = parseInt($(this).val().charAt(0));
         var imageSet = '';
         if( getInputFirst == 3 ){
             imageSet = '<img src="'+cardDetail.cardfolder+'/amex.svg" class="card-input-img">';
+            jQuery('#tunl_cvc').val('');
+            jQuery('#tunl_cvc').unmask().mask("0000"); 
         }else if( getInputFirst == 4 ){
             imageSet = '<img src="'+cardDetail.cardfolder+'/visa.svg" class="card-input-img">';
+            jQuery('#tunl_cvc').val('');
+            jQuery('#tunl_cvc').unmask().mask("000"); 
         }else if( getInputFirst == 5 ){
             imageSet = '<img src="'+cardDetail.cardfolder+'/mastercard.svg" class="card-input-img">';
+            jQuery('#tunl_cvc').val('');
+            jQuery('#tunl_cvc').unmask().mask("000"); 
         }else if( getInputFirst == 6 ){
             imageSet = '<img src="'+cardDetail.cardfolder+'/discover.svg" class="card-input-img">';
+            jQuery('#tunl_cvc').val('');
+            jQuery('#tunl_cvc').unmask().mask("000"); 
         }
         jQuery('#tunl_ccno').after(imageSet);
     });

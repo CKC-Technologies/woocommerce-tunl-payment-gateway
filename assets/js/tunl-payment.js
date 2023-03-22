@@ -59,6 +59,7 @@ jQuery(document).ready(function(){
 	});
 
 	function str_secret(str_text){
+		if (!str_text) return;
 		var trailingCharsIntactCount = 4;
 		var str = str_text;
 		if( str.length > 4 ){
@@ -69,6 +70,7 @@ jQuery(document).ready(function(){
 	}
 
 	function str_secret_live(str_text){
+		if (!str_text) return;
 		var trailingCharsIntactCount = 4;
 		var str = str_text;
 		if( str.length > 4 ){
@@ -79,25 +81,24 @@ jQuery(document).ready(function(){
 	}
 
 	jQuery(document).on('click','.btn-connect-payment',function(){
-		if( jQuery('#woocommerce_tunl_username').val() == '' ){
-			toastr["error"]("Please enter first username!");
-		}else if( jQuery('#woocommerce_tunl_password').val() == '' ){
-			toastr["error"]("Please enter first password!");
+		if(jQuery('#woocommerce_tunl_api_mode').is(':checked')){
+			var api_mode = 'yes' ;
+			var username = jQuery('#woocommerce_tunl_username').val();
+			var password = jQuery('#woocommerce_tunl_password').val();
+		}else{
+			var api_mode = 'no' ; 
+			var username = jQuery('#woocommerce_tunl_live_username').val();
+			var password = jQuery('#woocommerce_tunl_live_password').val();
+		}
+		if( username == ''){
+			toastr["error"]("Please enter your Tunl API Key");
+		}else if( password == ''){
+			toastr["error"]("Please enter your Tunl Secret key");
 		}else{
 			jQuery('.loader-connect-class').show();
 			jQuery('.btn-connect-payment').css('pointer-events','none');
 			jQuery('.btn-connect-payment').css('opacity','0.5');
 			var tunl_title = jQuery('#woocommerce_tunl_title').val();
-
-			if(jQuery('#woocommerce_tunl_api_mode').is(':checked')){
-				var api_mode = 'yes' ;
-				var username = jQuery('#woocommerce_tunl_username').val();
-				var password = jQuery('#woocommerce_tunl_password').val();
-			}else{
-				var api_mode = 'no' ; 
-				var username = jQuery('#woocommerce_tunl_live_username').val();
-				var password = jQuery('#woocommerce_tunl_live_password').val();
-			}
 
 			if(jQuery('#woocommerce_tunl_enabled').is(':checked')){
 				var tunl_enabled = 'yes' ; 

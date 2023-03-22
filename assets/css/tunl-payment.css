@@ -4,15 +4,18 @@
     border-color: #6c757d !important;
     box-shadow: none;
 }
+
 #mainform .btn-disconnect-payment {
     color: #fff;
     background-color: #dc3545 !important;
     border-color: #dc3545 !important;
     box-shadow: none;
 }
+
 #toast-container .toast{
     opacity: 1;
 }
+
 a.btn-connected {
     pointer-events: none;
     text-decoration: unset;
@@ -21,10 +24,12 @@ a.btn-connected {
     display: inline-block;
     margin-top: 4px;
 }
+
 .connect-btn-section {
     display: block;
     position: relative;
 }
+
 img.loader-connect-class {
     height: 25px;
     position: absolute;
@@ -32,11 +37,12 @@ img.loader-connect-class {
     top: 2px;
     display: none;
 }
+
 .disconnect-btn-section {
     display: block;
     position: relative;
-
 }
+
 img.loader-disconnect-class {
     height: 25px;
     position: absolute;
@@ -44,10 +50,12 @@ img.loader-disconnect-class {
     top: 2px;
     display: none;
 }
+
 .tunl_token_class {
     display: none;   
 }
 
-.live_tunl_class, .sandbox_tunl_class{
+.live_tunl_class,
+.sandbox_tunl_class {
     display: none;
 }
