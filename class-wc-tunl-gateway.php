@@ -779,7 +779,7 @@ function connect_tunl_payment()
 			$myOptions['enabled'] = 'no';
 		}
 
-		if ( isset( $_POST['api_mode'] ) ) {
+		if ( isset( $_POST['api_mode'] ) && $_POST['api_mode'] == "yes" ) {
 			$myOptions['api_mode'] = 'yes';
 			$myOptions['username'] = $username;
 			$myOptions['password'] = $password;
