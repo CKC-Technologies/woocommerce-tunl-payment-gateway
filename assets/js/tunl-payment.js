@@ -1,156 +1,174 @@
-jQuery(document).ready(function(){
+jQuery(document).ready(function () {
+  function addHiddenClass(id, className) {
+    jQuery(`#woocommerce_tunl_${id}`)
+      .parent()
+      .parent()
+      .parent()
+      .addClass(`${className}_tunl_class`);
+  }
 
-	jQuery('#woocommerce_tunl_password').parent().parent().parent().addClass('sandbox_tunl_class');
-	jQuery('#woocommerce_tunl_username').parent().parent().parent().addClass('sandbox_tunl_class');
+  function showLive() {
+    jQuery(".sandbox_tunl_class").hide();
+    jQuery(".live_tunl_class").show();
+  }
 
-	jQuery('#woocommerce_tunl_live_password').parent().parent().parent().addClass('live_tunl_class');
-	jQuery('#woocommerce_tunl_live_username').parent().parent().parent().addClass('live_tunl_class');
+  function showSandbox() {
+    jQuery(".live_tunl_class").hide();
+    jQuery(".sandbox_tunl_class").show();
+  }
 
-	
-	if( jQuery('#woocommerce_tunl_api_mode').prop('checked') == true ){
-		jQuery('.sandbox_tunl_class').show();
-	}else{
-		jQuery('.live_tunl_class').show();
-	}
+  addHiddenClass("username", "sandbox");
+  addHiddenClass("password", "sandbox");
 
-	jQuery(document).on('change','#woocommerce_tunl_api_mode',function() {
-	    if( jQuery(this).prop('checked') == true ){
-			jQuery('.sandbox_tunl_class').show();
-			jQuery('.live_tunl_class').hide();
-		}else{
-			jQuery('.live_tunl_class').show();
-			jQuery('.sandbox_tunl_class').hide();
-		}
-	})
+  addHiddenClass("live_username", "live");
+  addHiddenClass("live_password", "live");
 
-	toastr.options = {
-	  "closeButton": false,
-	  "debug": false,
-	  "newestOnTop": false,
-	  "progressBar": false,
-	  "positionClass": "toast-top-right",
-	  "preventDuplicates": false,
-	  "onclick": null,
-	  "showDuration": "300",
-	  "hideDuration": "1000",
-	  "timeOut": "3000",
-	  "extendedTimeOut": "1000",
-	  "showEasing": "swing",
-	  "hideEasing": "linear",
-	  "showMethod": "fadeIn",
-	  "hideMethod": "fadeOut"
-	}
+  const testModeEnabled = jQuery("#woocommerce_tunl_api_mode").prop("checked");
+  testModeEnabled ? showSandbox() : showLive();
 
-	jQuery('#mainform #woocommerce_tunl_password').attr('autocomplete','new-password');
-	jQuery('#mainform #woocommerce_tunl_tunl_token').attr('readonly','readonly');
-	jQuery('#mainform #woocommerce_tunl_tunl_token').parent().append('<a href="javascript:void(0)" class="btn-connected">Connected</a>');
+  toastr.options = {
+    closeButton: false,
+    debug: false,
+    newestOnTop: false,
+    progressBar: false,
+    positionClass: "toast-top-right",
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "3000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
 
-	if( jQuery('#mainform #woocommerce_tunl_connect_button').val() == 1 ){
-		jQuery('#mainform #woocommerce_tunl_connect_button').parents('.forminp').append('<div class="connect-btn-section"><img src="'+adminAjax.ajaxloader+'" class="loader-connect-class"><a href="javascript:void(0)" class="btn button-primary btn-connect-payment">Authenticate</a></div>');
-	}else{
-		jQuery('#mainform #woocommerce_tunl_connect_button').parents('.forminp').parent().hide();
-		// jQuery('#mainform #woocommerce_tunl_connect_button').parents('.forminp').append('<div class="disconnect-btn-section"><img src="'+adminAjax.ajaxloader+'" class="loader-disconnect-class"><a href="javascript:void(0)" class="btn button-primary btn-disconnect-payment">Disconnect To Tunl</a></div>');
-	}
+  function disableAutoComplete(selector) {
+    jQuery(selector).attr("autocomplete", "new-password");
+  }
 
-	str_secret(jQuery('#woocommerce_tunl_password').val());
-	str_secret_live(jQuery('#woocommerce_tunl_live_password').val());
-	jQuery(document).on('keyup','#woocommerce_tunl_password',function(){
-		// str_secret(jQuery(this).val());
-	});
+  disableAutoComplete("#woocommerce_tunl_password");
 
-	function str_secret(str_text){
-		if (!str_text) return;
-		var trailingCharsIntactCount = 4;
-		var str = str_text;
-		if( str.length > 4 ){
-			str = new Array(28).join('*') + str.slice(-trailingCharsIntactCount);
-		}
-		jQuery('#woocommerce_tunl_password').val(str);
-		jQuery('#woocommerce_tunl_password').attr('value',str);
-	}
+  const loader = `<img src="${adminAjax.ajaxloader}" class="loader-connect-class" />`;
 
-	function str_secret_live(str_text){
-		if (!str_text) return;
-		var trailingCharsIntactCount = 4;
-		var str = str_text;
-		if( str.length > 4 ){
-			str = new Array(28).join('*') + str.slice(-trailingCharsIntactCount);
-		}
-		jQuery('#woocommerce_tunl_live_password').val(str);
-		jQuery('#woocommerce_tunl_live_password').attr('value',str);
-	}
+  const authButton = `<a class="btn button-primary btn-connect-payment">Authenticate</a>`;
+  const disconnectBtn = `<a class="btn button-primary btn-disconnect-payment">Disconnect</a>`;
+  const authButtonElm = jQuery(authButton).hide();
+  const disconnectElm = jQuery(disconnectBtn).hide();
 
-	jQuery(document).on('click','.btn-connect-payment',function(){
-		if(jQuery('#woocommerce_tunl_api_mode').is(':checked')){
-			var api_mode = 'yes' ;
-			var username = jQuery('#woocommerce_tunl_username').val();
-			var password = jQuery('#woocommerce_tunl_password').val();
-		}else{
-			var api_mode = 'no' ; 
-			var username = jQuery('#woocommerce_tunl_live_username').val();
-			var password = jQuery('#woocommerce_tunl_live_password').val();
-		}
-		if( username == ''){
-			toastr["error"]("Please enter your Tunl API Key");
-		}else if( password == ''){
-			toastr["error"]("Please enter your Tunl Secret key");
-		}else{
-			jQuery('.loader-connect-class').show();
-			jQuery('.btn-connect-payment').css('pointer-events','none');
-			jQuery('.btn-connect-payment').css('opacity','0.5');
-			var tunl_title = jQuery('#woocommerce_tunl_title').val();
+  const buttonsAndLoaderSection = jQuery(
+    `<div class="connect-btn-section">${loader}</div>`
+  );
+  buttonsAndLoaderSection.append(authButtonElm);
+  buttonsAndLoaderSection.append(disconnectElm);
 
-			if(jQuery('#woocommerce_tunl_enabled').is(':checked')){
-				var tunl_enabled = 'yes' ; 
-			}else{
-				var tunl_enabled = 'no' ; 
-			}
+  const tunlConnectBtn = jQuery("#woocommerce_tunl_connect_button");
+  const isAuthenticated =
+    tunlConnectBtn.val() == 1 || tunlConnectBtn.val() == "";
+  const formInp = tunlConnectBtn.parents(".forminp");
+  formInp.append(buttonsAndLoaderSection);
 
-			window.onbeforeunload = null;
-			jQuery.ajax({
-			  type: 'POST',
-			  url: adminAjax.ajaxurl,
-			  data: { action: 'connect_tunl_payment', tunl_title: tunl_title, username: username, password: password, api_mode: api_mode, tunl_enabled: tunl_enabled },
-			  success: function(response){
-				jQuery('.loader-connect-class').hide();
-				jQuery('.btn-connect-payment').css('pointer-events','unset');
-				jQuery('.btn-connect-payment').css('opacity','1');
+  const tokenParent = jQuery("#woocommerce_tunl_tunl_token").parent();
+  const connectedStatus = jQuery(
+    `<a class="btn-connected">Connected</a>`
+  ).hide();
+  const disconnectedStatus = jQuery(`<a>Disconnected</a>`).hide();
 
-				if( response.status ){
-					toastr["success"](response.message);
-					setTimeout(function () {
-						location.reload();
-					}, 1000);
-				}else{
-					toastr["error"](response.message);
-				}
-			  }
-			});
-		}
-	});
+  tokenParent.append(connectedStatus);
+  tokenParent.append(disconnectedStatus);
 
-	jQuery(document).on('click','.btn-disconnect-payment',function(){
-		jQuery('.loader-disconnect-class').show();
-		jQuery('.btn-disconnect-payment').css('pointer-events','none');
-		jQuery('.btn-disconnect-payment').css('opacity','0.5');
-		jQuery.ajax({
-			type: 'POST',
-			url: adminAjax.ajaxurl,
-			data: { action: 'disconnect_tunl_payment' },
-			success: function(response){
-				jQuery('.loader-disconnect-class').hide();
-				jQuery('.btn-disconnect-payment').css('pointer-events','unset');
-				jQuery('.btn-disconnect-payment').css('opacity','1');
+  jQuery(document).on("change", "#woocommerce_tunl_api_mode", function () {
+    const testModeEnabled = jQuery(this).prop("checked");
+    testModeEnabled ? showSandbox() : showLive();
+    showAuthButton();
+    tunlConnectBtn.val("1");
+  });
 
-				if( response.status ){
-					toastr["success"](response.message);
-					setTimeout(function () {
-						location.reload();
-					}, 1000);
-				}else{
-					toastr["error"](response.message);
-				}
-			}
-		});
-	});
+  const showAuthButton = () =>
+    connectedStatus.hide() &&
+    disconnectedStatus.show() &&
+    authButtonElm.show() &&
+    disconnectElm.hide();
+  const showDisconnect = () =>
+    connectedStatus.show() &&
+    disconnectedStatus.hide() &&
+    authButtonElm.hide() &&
+    disconnectElm.show();
+  isAuthenticated ? showAuthButton() : showDisconnect();
+
+  function showLoader(type) {
+    jQuery(`.loader-connect-class`).show();
+    jQuery(`.btn-${type}-payment`).css("pointer-events", "none");
+    jQuery(`.btn-${type}-payment`).css("opacity", "0.5");
+  }
+
+  function hideLoader(type) {
+    jQuery(`.loader-connect-class`).hide();
+    jQuery(`.btn-${type}-payment`).css("pointer-events", "unset");
+    jQuery(`.btn-${type}-payment`).css("opacity", "1");
+  }
+
+  function reloadPage() {
+    setTimeout(function () {
+      location.reload();
+    }, 1000);
+  }
+
+  function post(data, loader, reload = true) {
+    showLoader(loader);
+    jQuery.ajax({
+      type: "POST",
+      url: adminAjax.ajaxurl,
+      data,
+      success: function (response) {
+        if (!response.status) {
+          hideLoader(loader);
+          return toastr["error"](response.message);
+        }
+        toastr["success"](response.message);
+        reload && reloadPage();
+      },
+    });
+  }
+
+  jQuery(document).on("click", ".btn-connect-payment", function () {
+    const demoUser = jQuery("#woocommerce_tunl_username").val();
+    const demoPass = jQuery("#woocommerce_tunl_password").val();
+    const liveUser = jQuery("#woocommerce_tunl_live_username").val();
+    const livePass = jQuery("#woocommerce_tunl_live_password").val();
+
+    const testMode = jQuery("#woocommerce_tunl_api_mode").is(":checked");
+    const api_mode = testMode ? "yes" : "no";
+
+    const enabled = jQuery("#woocommerce_tunl_enabled").is(":checked");
+    const tunl_enabled = enabled ? "yes" : "no";
+
+    const username = testMode ? demoUser : liveUser;
+    const password = testMode ? demoPass : livePass;
+    if (!username) return toastr["error"]("Please enter API Key!");
+    if (!password) return toastr["error"]("Please enter Secret Key!");
+
+    var tunl_title = jQuery("#woocommerce_tunl_title").val();
+
+    const data = {
+      action: "connect_tunl_payment",
+      tunl_title,
+      username,
+      password,
+      api_mode,
+      tunl_enabled,
+    };
+
+    post(data, "connect");
+
+    window.onbeforeunload = null;
+  });
+
+  jQuery(document).on("click", ".btn-disconnect-payment", function () {
+    const testMode = jQuery("#woocommerce_tunl_api_mode").is(":checked");
+    const api_mode = testMode ? "yes" : "no";
+    const data = { action: "disconnect_tunl_payment", api_mode };
+    post(data, "disconnect");
+  });
 });
