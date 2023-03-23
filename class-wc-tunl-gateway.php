@@ -260,9 +260,9 @@ function initialize_tunl_class()
 				'default'  => $this->get_option( 'connect_button' ),
 				'desc_tip' => false,
 			);
-			if ( empty( $this->get_option( 'connect_button' ) ) || ( $this->get_option( 'connect_button' ) == 1 ) ) {
-				$this->form_fields = $arrayfields;
-			} else {
+			// if ( empty( $this->get_option( 'connect_button' ) ) || ( $this->get_option( 'connect_button' ) == 1 ) ) {
+			// 	$this->form_fields = $arrayfields;
+			// } else {
 				$arrayfields['tunl_token'] = array(
 					'title'    => __( 'Status', 'tunlwoopay' ),
 					'label'    => __( 'Status', 'tunlwoopay' ),
@@ -271,7 +271,7 @@ function initialize_tunl_class()
 					'desc_tip' => false,
 				);
 				$this->form_fields = $arrayfields;
-			}
+			// }
 		}
 
 		/** Load the credit card form fields */
