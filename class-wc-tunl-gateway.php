@@ -60,6 +60,7 @@ if (!function_exists('tunl_payment_deactivate')) {
 	{
 
 		/**  Reset the tunl payment method form field */
+		delete_option('woocommerce_tunl_settings');
 
 	}
 
