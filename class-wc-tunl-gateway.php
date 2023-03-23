@@ -180,22 +180,22 @@ function initialize_tunl_class()
 
 			if (isset($_POST['woocommerce_tunl_connect_button'])) {
 				$buttonConnect = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_connect_button']));
-				} else {
+			} else {
 				$buttonConnect = '';
 			}
-			
+
 			$passwordIsNotMasked = strlen(str_replace('*', '', $password)) > 4;
 			$livePassIsNotMasked = strlen(str_replace('*', '', $livepassword)) > 4;
 
 			$myOptions['connect_button']  = $buttonConnect;
-				$myOptions['username']        = $username;
+			$myOptions['username']        = $username;
 			$myOptions['password']        = mask($password);
 			$myOptions['live_username']   = $liveusername;
 			$myOptions['live_password']   = mask($livepassword);
-				
+
 			if ($passwordIsNotMasked){
 				$myOptions['saved_password']        = apply_filters( 'tunl_encrypt_filter', $password );
-					}
+			}
 
 			if ($livePassIsNotMasked){
 				$myOptions['saved_live_password']   = apply_filters( 'tunl_encrypt_filter', $livepassword );
@@ -650,21 +650,27 @@ add_filter( 'woocommerce_payment_gateways', 'add_custom_gateway_class' );
 /** Ajax functionality for connection with tunl payment api */
 function connect_tunl_payment()
 {
+	$myOptions = get_option('woocommerce_tunl_settings');
 	$apiMode = $_POST['api_mode'];
 	$username = $_POST['username'];
 	$password = $_POST['password'];
+	$prodMode = empty($apiMode) || ($apiMode == 'no');
+
 	$myOptionsData = get_option('woocommerce_tunl_settings');
-	if (empty($apiMode) || ($apiMode == 'no')) {
-		if (substr($myOptionsData['live_password'], -4) === str_replace('*', '', $password)) {
-			$password = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_live_password']);
-		}
-		$url = TUNL_LIVE_URL . '/auth';
-	} else {
-		if (substr($myOptionsData['password'], -4) === str_replace('*', '', $password)) {
-			$password = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_password']);
-		}
-		$url = TUNL_TEST_URL . '/auth';
+	$decryptedLivePW = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_live_password']);
+	$decryptedTestPW = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_password']);
+
+	$last4ofSubmittedPW = substr($password, -4);
+	$last4ofCurrentPW = $prodMode ? substr($decryptedLivePW, -4) : substr($decryptedTestPW, -4);
+	$last4Match = $last4ofCurrentPW === $last4ofSubmittedPW;
+
+
+	$url = $prodMode ? TUNL_LIVE_URL . '/auth' : TUNL_TEST_URL . '/auth';
+
+	if ($last4Match) {
+		$password = $prodMode ? $decryptedLivePW : $decryptedTestPW;
 	}
+
 	$body = array(
 		'username' => $username,
 		'password' => $password,
@@ -683,10 +689,10 @@ function connect_tunl_payment()
 
 	/** Authentication process with tunl payment api */
 	$resultData = json_decode( $response['body'], true );
-	if ( isset( $resultData['code'] ) ) {
+	if ( !isset( $resultData['token'] ) ) {
 		$resultingData = array(
 			'status' => false,
-			'message' => $resultData['message'],
+			'message' => "TUNL API Authentication Error!",
 			'data' => array(),
 		);
 	}else{
@@ -701,19 +707,14 @@ function connect_tunl_payment()
 		if ( isset( $_POST['api_mode'] ) && $_POST['api_mode'] == "yes" ) {
 			$myOptions['api_mode'] = 'yes';
 			$myOptions['username'] = $username;
-			$myOptions['password'] = $password;
+			$myOptions['password'] = mask($password);
 			$myOptions['saved_password'] = apply_filters( 'tunl_encrypt_filter', $password );
-			$myOptions['live_username'] = $myOptionsData['live_username'];
-			$myOptions['live_password'] = $myOptionsData['live_password'];
-			$myOptions['saved_live_password'] = $myOptionsData['live_password'];
+			
 		} else {
 			$myOptions['api_mode'] = 'no';
 			$myOptions['live_username'] = $username;
-			$myOptions['live_password'] = $password;
+			$myOptions['live_password'] = mask($password);
 			$myOptions['saved_live_password'] = apply_filters( 'tunl_encrypt_filter', $password );
-			$myOptions['username'] = $myOptionsData['username'];
-			$myOptions['password'] = $myOptionsData['password'];
-			$myOptions['saved_password'] = $myOptionsData['password'];
 		}
 
 		$myOptions['title'] = $_POST['tunl_title'];
