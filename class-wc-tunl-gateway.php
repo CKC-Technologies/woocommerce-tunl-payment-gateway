@@ -134,7 +134,7 @@ function initialize_tunl_class()
 		/**  Save Tunl Payment Methods Fields */
 		public function save_tunlpayment() {
 
-			$myOptions = array();
+			$myOptions = get_option('woocommerce_tunl_settings');
 
 			if (isset($_POST['woocommerce_tunl_enabled'])) {
 				$myOptions['enabled'] = 'yes';
