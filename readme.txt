@@ -18,7 +18,7 @@ Download and install the *Tunl Payment Gateway* plugin to accept credit card pay
 
 = Features =
 * Fast and easy setup
-* Accept all major credit cards payments via the Tunl payment gateway on your WooCommerce store
+* Accept all major credit card payments via the Tunl payment gateway on your WooCommerce store
 * Track and confirm successful payments with detailed Order Notes
 * Process automatic refunds directly from your WordPress dashboard
 

@@ -568,8 +568,20 @@ function initialize_tunl_class()
 		            
 					
 					if( $resultData['phardcode'] == 'SUCCESS' ){
+						/** Some notes to customer (replace true with false to make it private) */
+						$order = new WC_Order($orderId);
+						$totalAmountRefund = $_POST['refund_amount'];
 		                
-						return add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
+						if( empty($_POST['refund_reason']) ){
+							$setReason = '';
+						}else{
+							$setReason = $_POST['refund_reason'];
+						}
+						$note = "Refunded $".$totalAmountRefund." - Refund ID: ".$resultData['ttid']." - Reason: ".$setReason;
+						$order->add_order_note( $note );
+						$order->save();
+		                
+						// return add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
 
 					}else{
 						
@@ -823,7 +835,7 @@ function tunl_checkout_validation_unique_error( $data, $errors ){
 		if( empty( $myOptions['connect_button'] ) || ( $myOptions['connect_button'] == 1 ) ){
 
 			/** Add a unique custom one */
-			$errors->add( 'validation', '<strong>Tunl Connection</strong> is pending, So wait for connection.' );
+			$errors->add( 'validation', 'Tunl Payment Gateway is not connected. Please contact the merchant for further assistance.' );
 		}else{
 			if( empty($_POST['tunl_cardnumber']) ){
 				$errors->add( 'validation', '<strong>Card Number</strong> is a required field.' );
