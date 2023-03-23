@@ -473,7 +473,7 @@ function initialize_tunl_class()
 					$resultData = json_decode($response['body'], true);
 		            
 					
-					if( $resultData['phardcode'] == 'SUCCESS' ){
+					if( $resultData['code'] != 'PaymentException' ){
 						/** Some notes to customer (replace true with false to make it private) */
 						$order = new WC_Order($orderId);
 						$totalAmountRefund = $_POST['refund_amount'];
