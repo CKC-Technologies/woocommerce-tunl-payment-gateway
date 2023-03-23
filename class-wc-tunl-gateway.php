@@ -178,124 +178,27 @@ function initialize_tunl_class()
 				$livepassword = '';
 			}
 
-			$myOptionsData = get_option('woocommerce_tunl_settings');
-			if ($myOptionsData['api_mode'] != $myOptions['api_mode']) {
-				$setpaymentpost = 1;
-				if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-					if (substr($myOptionsData['live_password'], -4) === str_replace('*', '', $livepassword)) {
-						$livepassword = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_live_password']);
-					}
+			if (isset($_POST['woocommerce_tunl_connect_button'])) {
+				$buttonConnect = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_connect_button']));
 				} else {
-					if (substr($myOptionsData['password'], -4) === str_replace('*', '', $password)) {
-						$password = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_password']);
-					}
-				}
-			} else {
-				if (empty( $myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-					if ($liveusername === $myOptionsData['live_username']) {
-						if (substr($myOptionsData['live_password'], -4) === str_replace('*', '', $livepassword)) {
-							$setpaymentpost = 0;
-						} else {
-							$setpaymentpost = 1;
-						}
-					} else {
-						$setpaymentpost = 1;
-					}
-				} else {
-					if ($username === $myOptionsData['username']) {
-						if (substr($myOptionsData['password'], -4) === str_replace('*', '', $password)) {
-							$setpaymentpost = 0;
-						} else {
-							$setpaymentpost = 1;
-						}
-					} else {
-						$setpaymentpost = 1;
-					}
-				}
+				$buttonConnect = '';
 			}
 			
-			if ($setpaymentpost == 1) {
-				$myOptions['connect_button']  = 1;
-				$myOptions['tunl_token']      = '';
-				$myOptions['tunl_merchantId'] = '';
+			$passwordIsNotMasked = strlen(str_replace('*', '', $password)) > 4;
+			$livePassIsNotMasked = strlen(str_replace('*', '', $livepassword)) > 4;
+
+			$myOptions['connect_button']  = $buttonConnect;
 				$myOptions['username']        = $username;
-				$myOptions['password']        = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_password']));
-				$myOptions['saved_password']        = $password;
-				$myOptions['live_username']        = $liveusername;
-				$myOptions['live_password']        = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_live_password']));
-				$myOptions['saved_live_password']        = $livepassword;
+			$myOptions['password']        = mask($password);
+			$myOptions['live_username']   = $liveusername;
+			$myOptions['live_password']   = mask($livepassword);
 				
-				if (!empty($username) && !empty($password)) {
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-						$url = TUNL_LIVE_URL . '/auth';
-						$checkusername = $liveusername;
-						$checkpassword = $livepassword;
-					} else {
-						$url = TUNL_TEST_URL . '/auth';
-						$checkusername = $username;
-						$checkpassword = $password;
+			if ($passwordIsNotMasked){
+				$myOptions['saved_password']        = apply_filters( 'tunl_encrypt_filter', $password );
 					}
 
-					$body = array(
-						'username' => $checkusername,
-						'password' => $checkpassword,
-						'scope'    => 'PAYMENT_WRITE',
-						'lifespan' => 15,
-					);
-
-					/**  Check authentication with tunl payment api */
-					$response = wp_remote_post(
-						$url,
-						array(
-							'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
-							'body'        => wp_json_encode($body),
-							'method'      => 'POST',
-							'data_format' => 'body',
-						)
-					);
-
-					$resultdata = json_decode( $response['body'], true );
-
-					if ( isset( $resultdata['code'] ) ) {
-						add_action( 'admin_notices', 'tunl_auth_error_action' );
-						if ( empty( $myOptions['api_mode'] ) || ( $myOptions['api_mode'] == 'no' ) ) {
-							$myOptions['live_password'] = sanitize_text_field( wp_unslash( $_POST['woocommerce_tunl_live_password'] ) );
-							$myOptions['saved_live_password'] = $myOptions['live_password'];
-							$myOptions['password'] = $myOptionsData['password'];
-							$myOptions['saved_password'] = $myOptionsData['saved_password'];
-						} else {
-							$myOptions['password'] = sanitize_text_field( wp_unslash( $_POST['woocommerce_tunl_password'] ) );
-							$myOptions['saved_password'] = $myOptions['password'];
-							$myOptions['live_password'] = $myOptionsData['live_password'];
-							$myOptions['saved_live_password'] = $myOptionsData['saved_live_password'];
-						}
-					} else {
-						$myOptions['connect_button']  = 2;
-						if ( empty( $myOptions['api_mode'] ) || ( $myOptions['api_mode'] == 'no' ) ) {
-							$myOptions['saved_live_password']      = apply_filters( 'tunl_encrypt_filter', $livepassword );
-							$myOptions['live_password']      = sanitize_text_field( wp_unslash( $_POST['woocommerce_tunl_live_password'] ) );
-							$myOptions['password'] = $myOptionsData['password'];
-							$myOptions['saved_password'] = $myOptionsData['saved_password'];
-						} else {
-							$myOptions['saved_password']      = apply_filters( 'tunl_encrypt_filter', $password );
-							$myOptions['password']      = sanitize_text_field( wp_unslash( $_POST['woocommerce_tunl_password'] ) );
-							$myOptions['live_password'] = $myOptionsData['live_password'];
-							$myOptions['saved_live_password'] = $myOptionsData['saved_live_password'];
-						}
-						$myOptions['tunl_token']      = $resultdata['token'];
-						$myOptions['tunl_merchantId'] = $resultdata['user']['id'];
-					}
-				}
-			} else {
-				$myOptions['username']        = $myOptionsData['username'];
-				$myOptions['password']        = $myOptionsData['password'];
-				$myOptions['saved_password']        = $myOptionsData['saved_password'];
-				$myOptions['live_username']        = $myOptionsData['live_username'];
-				$myOptions['live_password']        = $myOptionsData['live_password'];
-				$myOptions['saved_live_password']        = $myOptionsData['saved_live_password'];
-				$myOptions['connect_button']  = $myOptionsData['connect_button'];
-				$myOptions['tunl_token']      = $myOptionsData['tunl_token'];
-				$myOptions['tunl_merchantId'] = $myOptionsData['tunl_merchantId'];
+			if ($livePassIsNotMasked){
+				$myOptions['saved_live_password']   = apply_filters( 'tunl_encrypt_filter', $livepassword );
 			}
 			
 			do_action( 'woocommerce_update_option', array( 'id' => 'woocommerce_tunl_settings' ) );
