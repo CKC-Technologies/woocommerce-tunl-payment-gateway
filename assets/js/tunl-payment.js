@@ -52,7 +52,7 @@ jQuery(document).ready(function () {
 
   const loader = `<img src="${adminAjax.ajaxloader}" class="loader-connect-class" />`;
 
-  const authButton = `<a class="btn button-primary btn-connect-payment">Authenticate</a>`;
+  const authButton = `<a class="btn button-primary btn-connect-payment">Connect</a>`;
   const disconnectBtn = `<a class="btn button-primary btn-disconnect-payment">Disconnect</a>`;
   const authButtonElm = jQuery(authButton).hide();
   const disconnectElm = jQuery(disconnectBtn).hide();
@@ -71,9 +71,9 @@ jQuery(document).ready(function () {
 
   const tokenParent = jQuery("#woocommerce_tunl_tunl_token").parent();
   const connectedStatus = jQuery(
-    `<a class="btn-connected">Connected</a>`
+    `<a class="btn-connected" >Ready</a>`
   ).hide();
-  const disconnectedStatus = jQuery(`<a>Disconnected</a>`).hide();
+  const disconnectedStatus = jQuery(`<a >Not Ready</a>`).hide();
 
   tokenParent.append(connectedStatus);
   tokenParent.append(disconnectedStatus);
