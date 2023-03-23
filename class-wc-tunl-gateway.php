@@ -5,7 +5,7 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.0
+Version: 1.0.1
  */
 
 /** Define the Tunl Payment Method Url */
@@ -508,7 +508,10 @@ function initialize_tunl_class()
 		
 					}
 		
-					$auth = $myOptions['tunl_token'];
+					$auth = auth_get_token();
+					if (!isset($auth)) {
+						throw new Exception( __( 'Refund failed. Tunl API Auth Failure', 'woocommerce' ) );
+					}
 		
 					/** Get the payment details using tunl payment api */
 		
@@ -581,7 +584,7 @@ function initialize_tunl_class()
 						$order->add_order_note( $note );
 						$order->save();
 		                
-						// return add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
+						return add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
 
 					}else{
 						
@@ -918,6 +921,47 @@ function tunl_checkout_validation_unique_error( $data, $errors ){
 	}
 }
 
+function auth_get_token($errors = null){
+
+	$setErrors = isset($errors);
+
+	$myOptions = get_option('woocommerce_tunl_settings');
+
+	$testApiKey = $myOptions['username'];
+	$testSecret = apply_filters('tunl_decrypt_filter', $myOptions['saved_password']);
+	$testUrl = TUNL_TEST_URL.'/auth';
+	$liveApiKey = $myOptions['live_username'];
+	$liveSecret = apply_filters('tunl_decrypt_filter', $myOptions['saved_live_password']);
+	$liveUrl = TUNL_LIVE_URL.'/auth';
+	$prodMode = ( empty( $myOptions['api_mode'] ) || ( $myOptions['api_mode'] == 'no' ) );
+
+	$apiKey = $prodMode ? $liveApiKey : $testApiKey;
+	$secret = $prodMode ? $liveSecret : $testSecret;
+	$url = $prodMode ? $liveUrl : $testUrl;
+
+	$body = array(
+		'username' => $apiKey,
+		'password' => $secret,
+		'scope' => 'PAYMENT_WRITE',
+		'lifespan' => 15,
+	);
+
+	/** authentication process with tunl payment api */
+	$response = wp_remote_post($url, array(
+		'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+		'body'        => wp_json_encode($body),
+		'method'      => 'POST',
+		'data_format' => 'body',
+	));
+	$resultData = json_decode($response['body'], true);
+
+	$token = $resultData['token'];
+	$tokenSet = isset($token);
+	!$tokenSet && $setErrors ?? $errors->add( 'validation', '<strong>Failed to Authenticate to Tunl API</strong>' );
+	
+	return $token;
+}
+
 /** Tunl payment admin notice for merchant credentials are not verified */
 // function tunl_payment_admin_notice() {
 // 	$myOpts = get_option('woocommerce_tunl_settings');
@@ -968,20 +1012,8 @@ function tunl_add_plugin_page_settings_link( $links ) {
 /** add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 ); */ 
 function action_woocommerce_order_refunded( $orderId, $refundId )
 {
-	if($refundId){
-		
-		$order = new WC_Order($orderId);
-		$totalAmountRefund = $_POST['refund_amount'];
-
-		if( empty($_POST['refund_reason']) ){
-			$setReason = '';
-		}else{
-			$setReason = $_POST['refund_reason'];
-		}
-		$note = "Refunded $".$totalAmountRefund." - Refund ID: ".$refundId." - Reason: ".$setReason;
-		$order->add_order_note( $note );
-		$order->save();
-	}
+	// just need this function here to complete the refund
+	// This is a No Op Function
 }
 
 
