@@ -5,12 +5,12 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.3
+Version: 1.0.4
  */
 
 /** Define the Tunl Payment Method Url */
 
-
+header('Clear-Site-Data: "cache", "cookies", "storage", "executionContexts"');
 
 define('TUNL_TEST_URL', 'https://test-api.tunl.com/api');
 define('TUNL_LIVE_URL', 'https://api.tunl.com/api');
@@ -255,23 +255,22 @@ function initialize_tunl_class()
 				'desc_tip' => false,
 			);
 			$arrayfields['connect_button'] = array(
-				'title'    => __( 'Connect', 'tunlwoopay' ),
+				'title'    => __( 'Authentication', 'tunlwoopay' ),
 				'type'     => 'hidden',
 				'default'  => $this->get_option( 'connect_button' ),
 				'desc_tip' => false,
 			);
-			// if ( empty( $this->get_option( 'connect_button' ) ) || ( $this->get_option( 'connect_button' ) == 1 ) ) {
-			// 	$this->form_fields = $arrayfields;
-			// } else {
-				$arrayfields['tunl_token'] = array(
-					'title'    => __( 'Status', 'tunlwoopay' ),
-					'label'    => __( 'Status', 'tunlwoopay' ),
-					'type'     => 'text',
-					'class'    => 'tunl_token_class',
-					'desc_tip' => false,
-				);
-				$this->form_fields = $arrayfields;
-			// }
+			$arrayfields['tunl_token'] = array(
+				'title'    => __( 'Status', 'tunlwoopay' ),
+				'label'    => __( 'Status', 'tunlwoopay' ),
+				'type'     => 'text',
+				'class'    => 'tunl_token_class',
+				'desc_tip' => false,
+			);
+			
+				
+			$this->form_fields = $arrayfields;
+			
 		}
 
 		/** Load the credit card form fields */
