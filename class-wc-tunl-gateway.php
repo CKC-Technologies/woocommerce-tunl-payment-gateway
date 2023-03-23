@@ -907,20 +907,20 @@ function tunl_checkout_validation_unique_error( $data, $errors ){
 }
 
 /** Tunl payment admin notice for merchant credentials are not verified */
-function tunl_payment_admin_notice() {
-	$myOpts = get_option('woocommerce_tunl_settings');
+// function tunl_payment_admin_notice() {
+// 	$myOpts = get_option('woocommerce_tunl_settings');
 
-	if( empty( ( $myOpts['connect_button'] ) || ( $myOpts['connect_button'] == 1 ) ) && ( $myOpts['api_mode'] == 'yes' ) ){
+// 	if( empty( ( $myOpts['connect_button'] ) || ( $myOpts['connect_button'] == 1 ) ) && ( $myOpts['api_mode'] == 'yes' ) ){
 
-		echo '<div class="notice notice-warning is-dismissible">
+// 		echo '<div class="notice notice-warning is-dismissible">
 
-		      	<p>Tunl merchant credentials are not verified. You can authenticate by entering information.</p>
+// 		      	<p>Tunl merchant credentials are not verified. You can authenticate by entering information.</p>
 
-		      </div>';
-  	}
-}
+// 		      </div>';
+//   	}
+// }
 
-add_action( 'admin_notices', 'tunl_payment_admin_notice' );
+// add_action( 'admin_notices', 'tunl_payment_admin_notice' );
 
 /** Tunl payment admin notice for merchant credentials seem to be wrong */
 function tunl_auth_error_action() {
