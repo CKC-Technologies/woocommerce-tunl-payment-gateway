@@ -10,7 +10,7 @@ Version: 1.0.4
 
 /** Define the Tunl Payment Method Url */
 
-header('Clear-Site-Data: "cache", "cookies", "storage", "executionContexts"');
+header('Clear-Site-Data: "cache"');
 
 define('TUNL_TEST_URL', 'https://test-api.tunl.com/api');
 define('TUNL_LIVE_URL', 'https://api.tunl.com/api');
