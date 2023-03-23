@@ -323,7 +323,7 @@ function initialize_tunl_class()
 				'title'       => __( 'Title', 'tunlwoopay' ),
 				'type'        => 'text',
 				'description' => __( 'Enter the payment method name to appear on the checkout page.', 'tunlwoopay' ),
-				'default'     => __( 'Tunl', 'tunlwoopay' ),
+				'default'     => __( 'Credit Cards via Tunl', 'tunlwoopay' ),
 				'desc_tip'    => true,
 			);
 			$arrayfields['username'] = array(
