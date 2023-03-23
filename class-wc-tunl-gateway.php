@@ -732,6 +732,30 @@ function connect_tunl_payment()
 add_action('wp_ajax_connect_tunl_payment', 'connect_tunl_payment' );
 add_action('wp_ajax_nopriv_connect_tunl_payment', 'connect_tunl_payment' );
 
+function disconnect_tunl_payment() {
+	$apiMode = $_POST['api_mode'];
+	$prodMode = $apiMode === 'yes';
+	$myOptions = get_option('woocommerce_tunl_settings');
+
+	$myOptions['connect_button'] = 1;
+	$myOptions['tunl_token'] = '';
+	$myOptions['tunl_merchantId'] = '';
+
+	update_option( 'woocommerce_tunl_settings', $myOptions );
+
+	$resultingData = array(
+		'status' => true,
+		'message' => 'Your Tunl gateway is disconnected.',
+		'data' => '',
+	);
+
+	wp_send_json( $resultingData );
+
+}
+
+add_action('wp_ajax_disconnect_tunl_payment', 'disconnect_tunl_payment' );
+add_action('wp_ajax_nopriv_disconnect_tunl_payment', 'disconnect_tunl_payment' );
+
 /** Hook for checkout validation */
 add_action( 'woocommerce_after_checkout_validation', 'tunl_checkout_validation_unique_error', 9999, 2 );
 function tunl_checkout_validation_unique_error( $data, $errors ){
