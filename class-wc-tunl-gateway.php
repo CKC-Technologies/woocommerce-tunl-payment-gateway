@@ -974,3 +974,9 @@ function tunl_decrypt_key_function( $ivCiphertextB64 ){
 	return openssl_decrypt($ciphetext, "aes-256-cbc", '956560z4abzr4eb0bew5e512b39uq4s1', OPENSSL_RAW_DATA, $iv);
 
 }
+
+function mask($str){
+	if (empty($str)) return;
+	if (strlen($str) < 5) return;
+	return str_repeat('*', strlen($str) - 4) . substr($str, -4);
+}
