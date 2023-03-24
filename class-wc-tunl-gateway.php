@@ -97,9 +97,9 @@ function initialize_tunl_class()
 
 			$this->has_fields = true;
 
-			$this->title = __('Credit Cards via Tunl', 'tunlwoopay');
+			$this->title = __('Tunl', 'tunlwoopay');
 
-			$this->method_title = __('Credit Cards via Tunl', 'tunlwoopay');
+			$this->method_title = __('Tunl', 'tunlwoopay');
 
 			$desp = 'Tunl works by adding payment fields on the checkout and then sending the details to Tunl for verification.';
 
