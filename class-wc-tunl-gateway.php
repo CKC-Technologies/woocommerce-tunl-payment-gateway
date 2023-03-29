@@ -691,7 +691,7 @@ function connect_tunl_payment()
 	if ( !isset( $resultData['token'] ) ) {
 		$resultingData = array(
 			'status' => false,
-			'message' => "TUNL API Authentication Error!",
+			'message' => "Authentication error. Please check your Tunl credentials and try again.",
 			'data' => array(),
 		);
 	}else{
@@ -888,31 +888,6 @@ function auth_get_token($errors = null){
 	!$tokenSet && $setErrors ?? $errors->add( 'validation', '<strong>Failed to Authenticate to Tunl API</strong>' );
 	
 	return $token;
-}
-
-/** Tunl payment admin notice for merchant credentials are not verified */
-// function tunl_payment_admin_notice() {
-// 	$myOpts = get_option('woocommerce_tunl_settings');
-
-// 	if( empty( ( $myOpts['connect_button'] ) || ( $myOpts['connect_button'] == 1 ) ) && ( $myOpts['api_mode'] == 'yes' ) ){
-
-// 		echo '<div class="notice notice-warning is-dismissible">
-
-// 		      	<p>Tunl merchant credentials are not verified. You can authenticate by entering information.</p>
-
-// 		      </div>';
-//   	}
-// }
-
-// add_action( 'admin_notices', 'tunl_payment_admin_notice' );
-
-/** Tunl payment admin notice for merchant credentials seem to be wrong */
-function tunl_auth_error_action() {
-	echo '<div class="notice notice-error is-dismissible">
-
-	      	<p>Authentication error. Please check your Tunl credentials and try again.</p>
-
-	      </div>';
 }
 
 /** Show error message if WooCommerce is not installed and/or active */
