@@ -146,8 +146,8 @@ jQuery(document).ready(function () {
 
     const username = testMode ? demoUser : liveUser;
     const password = testMode ? demoPass : livePass;
-    if (!username) return toastr["error"]("Please enter API Key!");
-    if (!password) return toastr["error"]("Please enter Secret Key!");
+    if (!username) return toastr["error"]("Please enter your API Key.");
+    if (!password) return toastr["error"]("Please enter your Secret Key.");
 
     var tunl_title = jQuery("#woocommerce_tunl_title").val();
 

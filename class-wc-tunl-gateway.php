@@ -412,9 +412,6 @@ function initialize_tunl_class()
 					}
 		
 					$auth = auth_get_token();
-					if (!isset($auth)) {
-						throw new Exception( __( 'Refund failed. Tunl API Auth Failure', 'woocommerce' ) );
-					}
 		
 					/** Get the payment details using tunl payment api */
 		
@@ -601,7 +598,7 @@ function initialize_tunl_class()
 			} else {
 
 				/** If connection error while using payment process flow */
-				wc_add_notice( 'Connection error.', 'error' );
+				wc_add_notice( 'Unknown Wordpress Error in Processing Payment.', 'error' );
 				return true;
 			}
 		}
@@ -691,7 +688,7 @@ function connect_tunl_payment()
 	if ( !isset( $resultData['token'] ) ) {
 		$resultingData = array(
 			'status' => false,
-			'message' => "Authentication error. Please check your Tunl credentials and try again.",
+			'message' => "Authentication error. Please check your Tunl API Key/Secret and try again.",
 			'data' => array(),
 		);
 	}else{
@@ -875,17 +872,30 @@ function auth_get_token($errors = null){
 	);
 
 	/** authentication process with tunl payment api */
-	$response = wp_remote_post($url, array(
+	$request = wp_remote_post($url, array(
 		'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
 		'body'        => wp_json_encode($body),
 		'method'      => 'POST',
 		'data_format' => 'body',
 	));
-	$resultData = json_decode($response['body'], true);
+
+	if ( is_wp_error( $request )) {
+		// $setErrors ?? $errors->add( 'validation', '<strong>Unknown Wordpress Error</strong>' );
+		throw new Exception( __( 'Unknown Wordpress Error in Get Auth Token', 'woocommerce' ) );
+	}
+	
+	if ( wp_remote_retrieve_response_code( $request ) == 401 ) {
+		// $setErrors ?? $errors->add( 'validation', '<strong>Authentication error. Please check your Tunl Tunl API Key/Secret and try again.</strong>' );
+		throw new Exception( __( 'Authentication error. Please check your Tunl Tunl API Key/Secret and try again.', 'woocommerce' ) );
+	}
+	// $response = unserialize( wp_remote_retrieve_body( $request ) );
+
+	$resultData = json_decode($request['body'], true);
 
 	$token = $resultData['token'];
 	$tokenSet = isset($token);
-	!$tokenSet && $setErrors ?? $errors->add( 'validation', '<strong>Failed to Authenticate to Tunl API</strong>' );
+	// !$tokenSet && $setErrors ?? $errors->add( 'validation', '<strong>Tunl is temporarily unavailable. Please try again later.</strong>' );
+	!$tokenSet && throw new Exception( __( 'Tunl is temporarily unavailable. Please try again later.', 'woocommerce' ) );
 	
 	return $token;
 }
