@@ -114,8 +114,6 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 			$this->enabled = $this->get_option('enabled');
 
-			$this->api_mode = $this->get_option('api_mode', 'no');
-
 			$this->title = $this->get_option('title');
 
 			/** Action hook to save the settings */
