@@ -591,14 +591,20 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 					/** If Payment process is failed */
 					wc_add_notice('Payment failed. Please try again.', 'error');
-					return true;
+					return array(
+						'result' => 'error',
+						'message' => 'Payment failed. Please try again.',
+					);
 				}
 
 			} else {
 
 				/** If connection error while using payment process flow */
 				wc_add_notice('Unknown Wordpress Error in Processing Payment.', 'error');
-				return true;
+				return array(
+					'result' => 'error',
+					'message' => 'Unknown Wordpress Error in Processing Payment.',
+				);
 			}
 		}
 	}
