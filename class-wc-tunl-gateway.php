@@ -34,29 +34,24 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 	return;
 }
 
-/**  Plugin activation hook */
 
-if (!function_exists('tunl_payment_activate')) {
 
 	/**
-	 * Function Name : tunl_payment_activate
+	 * Function Name : tunl_gateway_woocommerce_plugin_activate
 	 */
-	function tunl_payment_activate()
+	function tunl_gateway_woocommerce_plugin_activate()
 	{
 		require_once(ABSPATH . '/wp-admin/includes/upgrade.php');
 	}
 
-	register_activation_hook(__FILE__, 'tunl_payment_activate');
+	register_activation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_activate');
 
-}
 
-/**  Plugin deactivation hook */
 
-if (!function_exists('tunl_payment_deactivate')) {
 	/**
-	 * Function Name : tunl_payment_deactivate
+	 * Function Name : tunl_gateway_woocommerce_plugin_deactivate
 	 */
-	function tunl_payment_deactivate()
+	function tunl_gateway_woocommerce_plugin_deactivate()
 	{
 
 		/**  Reset the tunl payment method form field */
@@ -64,18 +59,18 @@ if (!function_exists('tunl_payment_deactivate')) {
 
 	}
 
-	register_deactivation_hook(__FILE__, 'tunl_payment_deactivate');
+	register_deactivation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_deactivate');
 
-}
+
 
 /**  Initialize Tunl Class */
 
-add_action('plugins_loaded', 'tunl_initialize_woocommerce_gateway_class');
+add_action('plugins_loaded', 'tunl_gateway_initialize_woocommerce_gateway_class');
 
 /**
- * Function Name : tunl_initialize_woocommerce_gateway_class
+ * Function Name : tunl_gateway_initialize_woocommerce_gateway_class
  */
-function tunl_initialize_woocommerce_gateway_class()
+function tunl_gateway_initialize_woocommerce_gateway_class()
 {
 
 	/**
@@ -606,7 +601,7 @@ function tunl_initialize_woocommerce_gateway_class()
 }
 
 /** Script enqueue for plugin on admin */
-function custom_scripts_enqueue() {
+function tunl_gateway_custom_scripts_enqueue() {
 	wp_enqueue_script('tunlpaymentJs',plugin_dir_url( __FILE__ ).'assets/js/tunl-payment.js',array('jquery'),'1.0',true);
 	wp_enqueue_script('toastrJs',plugin_dir_url( __FILE__ ) . 'assets/js/toastr.min.js',array('jquery'),'1.0',true);
 	wp_enqueue_script('maskJs',plugin_dir_url( __FILE__ ) . 'assets/js/jquery.mask.min.js',array('jquery'),'1.0',true);
@@ -621,27 +616,27 @@ function custom_scripts_enqueue() {
 			)
 		);
 }
-add_action( 'admin_enqueue_scripts', 'custom_scripts_enqueue' );
+add_action( 'admin_enqueue_scripts', 'tunl_gateway_custom_scripts_enqueue' );
 
 /**  Script enqueue for frontend */
-function custom_frontend_scripts_enqueue() {
+function tunl_gateway_custom_frontend_scripts_enqueue() {
 	wp_enqueue_script('maskJs',plugin_dir_url( __FILE__ ) . 'assets/js/jquery.mask.min.js',array('jquery'),'1.0',true);
 	wp_enqueue_script('frontTunl',plugin_dir_url( __FILE__ ).'assets/js/tunl-front-payment.js',array('jquery'),'1.0',true);
 	wp_enqueue_style('tunlFrontCss',plugin_dir_url( __FILE__ ).'assets/css/tunl-front-payment.css',array(),'1.0','all');
 	wp_localize_script( 'frontTunl', 'cardDetail', array( 'cardfolder' => plugin_dir_url( __FILE__ ) . 'assets/images' ) );
 }
-add_action( 'wp_enqueue_scripts', 'custom_frontend_scripts_enqueue' );
+add_action( 'wp_enqueue_scripts', 'tunl_gateway_custom_frontend_scripts_enqueue' );
 
 /**
  * Allow the payment gateway on woocommerce payment setting
  *
  * @param int $gateways gateways.
  */
-function add_custom_gateway_class( $gateways ) {
+function tunl_gateway_add_custom_gateway_class( $gateways ) {
 	$gateways[] = 'WCTUNLGateway';
 	return $gateways;
 }
-add_filter( 'woocommerce_payment_gateways', 'add_custom_gateway_class' );
+add_filter( 'woocommerce_payment_gateways', 'tunl_gateway_add_custom_gateway_class' );
 
 /** Ajax functionality for connection with tunl payment api */
 function connect_tunl_payment()
