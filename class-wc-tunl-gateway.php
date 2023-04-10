@@ -652,7 +652,7 @@ function tunl_gateway_add_custom_gateway_class($gateways)
 add_filter('woocommerce_payment_gateways', 'tunl_gateway_add_custom_gateway_class');
 
 /** Ajax functionality for connection with tunl payment api */
-function connect_tunl_payment()
+function tunl_gateway_wc_admin_connect_to_api()
 {
 	$myOptions = get_option('woocommerce_tunl_settings');
 	$apiMode = $_POST['api_mode'];
@@ -734,10 +734,10 @@ function connect_tunl_payment()
 	}
 	wp_send_json($resultingData);
 }
-add_action('wp_ajax_connect_tunl_payment', 'connect_tunl_payment');
-add_action('wp_ajax_nopriv_connect_tunl_payment', 'connect_tunl_payment');
+add_action('wp_ajax_tunl_gateway_wc_admin_connect_to_api', 'tunl_gateway_wc_admin_connect_to_api');
+add_action('wp_ajax_nopriv_tunl_gateway_wc_admin_connect_to_api', 'tunl_gateway_wc_admin_connect_to_api');
 
-function disconnect_tunl_payment()
+function tunl_gateway_wc_admin_disconnect_to_api()
 {
 	$apiMode = $_POST['api_mode'];
 	$prodMode = $apiMode === 'yes';
@@ -759,12 +759,12 @@ function disconnect_tunl_payment()
 
 }
 
-add_action('wp_ajax_disconnect_tunl_payment', 'disconnect_tunl_payment');
-add_action('wp_ajax_nopriv_disconnect_tunl_payment', 'disconnect_tunl_payment');
+add_action('wp_ajax_tunl_gateway_wc_admin_disconnect_to_api', 'tunl_gateway_wc_admin_disconnect_to_api');
+add_action('wp_ajax_nopriv_tunl_gateway_wc_admin_disconnect_to_api', 'tunl_gateway_wc_admin_disconnect_to_api');
 
 /** Hook for checkout validation */
-add_action('woocommerce_after_checkout_validation', 'tunl_checkout_validation_unique_error', 9999, 2);
-function tunl_checkout_validation_unique_error($data, $errors)
+add_action('woocommerce_after_checkout_validation', 'tunl_gateway_checkout_validation_unique_error', 9999, 2);
+function tunl_gateway_checkout_validation_unique_error($data, $errors)
 {
 
 	/** Check for any validation errors */
