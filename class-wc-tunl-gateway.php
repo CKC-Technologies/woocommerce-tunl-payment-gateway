@@ -831,25 +831,6 @@ function tunl_gateway_checkout_validation_unique_error($data, $errors)
 
 					/** once authentication process done then save the token save */
 					update_option('woocommerce_tunl_settings', $myOptions);
-					// $body = array(
-					// 	'account' => $_POST['tunl_cardnumber'],
-					// 	'expdate' => $_POST['tunl_expirydate'],
-					// 	'cv' => $_POST['tunl_cardcode'],
-					// 	'action' => 'balanceinq',
-					// );
-
-					// /** Check the validation for credit cards filds using tunl payment api */
-					// $response = wp_remote_post($url, array(
-					// 	'headers'     => array('Content-Type' => 'application/json; charset=utf-8','Authorization' => 'Bearer '.$auth),
-					// 	'body'        => wp_json_encode($body),
-					// 	'method'      => 'POST',
-					// 	'data_format' => 'body',
-					// ));
-					// $rsD = json_decode($response['body'], true);
-
-					// if( isset($rsD['code']) && ( $rsD['code'] == 'PaymentException' || $rsD['code'] == 'AuthenticationException' ) ){
-					// 	$errors->add( 'validation', '<strong>'.$rsD['message'].'</strong>' );
-					// }
 
 				}
 			}
