@@ -152,7 +152,7 @@ jQuery(document).ready(function () {
     var tunl_title = jQuery("#woocommerce_tunl_title").val();
 
     const data = {
-      action: "connect_tunl_payment",
+      action: "tunl_gateway_wc_admin_connect_to_api",
       tunl_title,
       username,
       password,
@@ -168,7 +168,7 @@ jQuery(document).ready(function () {
   jQuery(document).on("click", ".btn-disconnect-payment", function () {
     const testMode = jQuery("#woocommerce_tunl_api_mode").is(":checked");
     const api_mode = testMode ? "yes" : "no";
-    const data = { action: "disconnect_tunl_payment", api_mode };
+    const data = { action: "tunl_gateway_wc_admin_disconnect_to_api", api_mode };
     post(data, "disconnect");
   });
 });
