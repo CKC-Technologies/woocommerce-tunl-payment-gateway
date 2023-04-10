@@ -642,7 +642,7 @@ add_action('wp_enqueue_scripts', 'tunl_gateway_custom_frontend_scripts_enqueue')
 /**
  * Allow the payment gateway on woocommerce payment setting
  *
- * @param int $gateways gateways.
+ * @param array $gateways gateways.
  */
 function tunl_gateway_add_custom_gateway_class($gateways)
 {
