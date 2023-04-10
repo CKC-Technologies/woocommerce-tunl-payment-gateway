@@ -70,12 +70,12 @@ if (!function_exists('tunl_payment_deactivate')) {
 
 /**  Initialize Tunl Class */
 
-add_action('plugins_loaded', 'initialize_tunl_class');
+add_action('plugins_loaded', 'tunl_initialize_woocommerce_gateway_class');
 
 /**
- * Function Name : initialize_tunl_class
+ * Function Name : tunl_initialize_woocommerce_gateway_class
  */
-function initialize_tunl_class()
+function tunl_initialize_woocommerce_gateway_class()
 {
 
 	/**
@@ -481,7 +481,7 @@ function initialize_tunl_class()
 							$setReason = $_POST['refund_reason'];
 						}
 						$note = "Refunded $".$totalAmountRefund." - Refund ID: ".$resultData['ttid']." - Reason: ".$setReason;
-						$order->add_order_note( $note );
+						$order->add_order_note( esc_html($note) );
 						$order->save();
 		                
 						return add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
