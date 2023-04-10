@@ -42,6 +42,8 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 function tunl_gateway_woocommerce_plugin_activate()
 {
 	require_once(ABSPATH . '/wp-admin/includes/upgrade.php');
+
+	tunl_gateway_v108_to_v109_upgrade();
 }
 
 register_activation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_activate');
@@ -60,6 +62,26 @@ function tunl_gateway_woocommerce_plugin_deactivate()
 }
 
 register_deactivation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_deactivate');
+
+function tunl_gateway_v108_to_v109_upgrade()
+{
+	// code to fix installs using the old deprecated encryption functions
+	$myOptions = get_option("woocommerce_tunl_settings");
+	$currentKey = $myOptions['secret_key'];
+	if (!$currentKey) {
+		$myOptions['secret_encryption_key'] = bin2hex(random_bytes(32));
+		$currentKey = $myOptions['secret_encryption_key'];
+
+		$valuesToFix = ['saved_password', 'saved_live_password'];
+
+		foreach($valuesToFix as $valueToFix){
+			$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
+			$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
+		}
+
+		update_option("woocommerce_tunl_settings", $myOptions);
+	}
+}
 
 
 
@@ -188,11 +210,11 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$myOptions['live_password'] = mask($livepassword);
 
 			if ($passwordIsNotMasked) {
-				$myOptions['saved_password'] = apply_filters('tunl_encrypt_filter', $password);
+				$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
 			}
 
 			if ($livePassIsNotMasked) {
-				$myOptions['saved_live_password'] = apply_filters('tunl_encrypt_filter', $livepassword);
+				$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $livepassword);
 			}
 
 			do_action('woocommerce_update_option', array('id' => 'woocommerce_tunl_settings'));
@@ -698,8 +720,8 @@ function tunl_gateway_wc_admin_connect_to_api()
 	$prodMode = empty($apiMode) || ($apiMode == 'no');
 
 	$myOptionsData = get_option('woocommerce_tunl_settings');
-	$decryptedLivePW = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_live_password']);
-	$decryptedTestPW = apply_filters('tunl_decrypt_filter', $myOptionsData['saved_password']);
+	$decryptedLivePW = apply_filters('tunl_gateway_decrypt_filter', $myOptionsData['saved_live_password']);
+	$decryptedTestPW = apply_filters('tunl_gateway_decrypt_filter', $myOptionsData['saved_password']);
 
 	$last4ofSubmittedPW = substr($password, -4);
 	$last4ofCurrentPW = $prodMode ? substr($decryptedLivePW, -4) : substr($decryptedTestPW, -4);
@@ -749,13 +771,13 @@ function tunl_gateway_wc_admin_connect_to_api()
 			$myOptions['api_mode'] = 'yes';
 			$myOptions['username'] = $username;
 			$myOptions['password'] = mask($password);
-			$myOptions['saved_password'] = apply_filters('tunl_encrypt_filter', $password);
+			$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
 
 		} else {
 			$myOptions['api_mode'] = 'no';
 			$myOptions['live_username'] = $username;
 			$myOptions['live_password'] = mask($password);
-			$myOptions['saved_live_password'] = apply_filters('tunl_encrypt_filter', $password);
+			$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
 		}
 
 		$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
@@ -821,9 +843,9 @@ function tunl_gateway_checkout_validation_unique_error($data, $errors)
 			}
 			if (!empty($_POST['tunl_cardnumber']) && !empty($_POST['tunl_expirydate']) && !empty($_POST['tunl_cardcode'])) {
 				$username = $myOptions['username'];
-				$password = apply_filters('tunl_decrypt_filter', $myOptions['saved_password']);
+				$password = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_password']);
 				$liveusername = $myOptions['live_username'];
-				$livepassword = apply_filters('tunl_decrypt_filter', $myOptions['saved_live_password']);
+				$livepassword = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_live_password']);
 
 				if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
 					$url = TUNL_LIVE_URL . '/auth';
@@ -881,10 +903,10 @@ function auth_get_token($errors = null)
 	$myOptions = get_option('woocommerce_tunl_settings');
 
 	$testApiKey = $myOptions['username'];
-	$testSecret = apply_filters('tunl_decrypt_filter', $myOptions['saved_password']);
+	$testSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_password']);
 	$testUrl = TUNL_TEST_URL . '/auth';
 	$liveApiKey = $myOptions['live_username'];
-	$liveSecret = apply_filters('tunl_decrypt_filter', $myOptions['saved_live_password']);
+	$liveSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_live_password']);
 	$liveUrl = TUNL_LIVE_URL . '/auth';
 	$prodMode = (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no'));
 
@@ -963,9 +985,30 @@ function action_woocommerce_order_refunded($orderId, $refundId)
 
 
 /**  Text should be encrypted as (AES-256) */
-add_filter('tunl_encrypt_filter', 'tunl_encrypt_key_function', 10, 1);
+add_filter('tunl_gateway_encrypt_filter', 'tunl_gateway_encrypt_key_function', 10, 1);
+add_filter('deprecated_tunl_gateway_encrypt_filter', 'deprecated_tunl_gateway_encrypt_key_function', 10, 1);
 
-function tunl_encrypt_key_function($plaintext)
+function tunl_gateway_encrypt_key_function($plaintext)
+{
+	$output = false;
+	$encrypt_method = "AES-256-CBC";
+
+	$myOptions = get_option("woocommerce_tunl_settings");
+	$secret_key = $myOptions['secret_key'];
+	$secret_iv = bin2hex(random_bytes(16));
+	// hash
+	$key = hash('sha256', $secret_key);    
+	// iv - encrypt method AES-256-CBC expects 16 bytes 
+	$iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+	$output = openssl_encrypt($plaintext, $encrypt_method, $key, 0, $iv);
+	$output = $secret_iv . base64_encode($output);
+	
+	return $output;
+
+}
+
+function deprecated_tunl_gateway_encrypt_key_function($plaintext)
 {
 
 	$iv = '';
@@ -979,9 +1022,29 @@ function tunl_encrypt_key_function($plaintext)
 }
 
 /**  Encrypted text should be decrypt as plain text */
-add_filter('tunl_decrypt_filter', 'tunl_decrypt_key_function', 10, 1);
+add_filter('tunl_gateway_decrypt_filter', 'tunl_gateway_decrypt_key_function', 10, 1);
+add_filter('deprecated_tunl_gateway_decrypt_filter', 'deprecated_tunl_gateway_decrypt_key_function', 10, 1);
 
-function tunl_decrypt_key_function($ivCiphertextB64)
+function tunl_gateway_decrypt_key_function($ivCiphertextB64)
+{
+	
+	$output = false;
+	$encrypt_method = "AES-256-CBC";
+	$myOptions = get_option("woocommerce_tunl_settings");
+	$secret_key = $myOptions['secret_key'];
+	$secret_iv = substr($ivCiphertextB64, 0, 32);
+	// hash
+	$key = hash('sha256', $secret_key);    
+	// iv - encrypt method AES-256-CBC expects 16 bytes 
+	$iv = substr(hash('sha256', $secret_iv), 0, 16);
+	$cipherText = substr($ivCiphertextB64, 32);
+
+	$output = openssl_decrypt(base64_decode($cipherText), $encrypt_method, $key, 0, $iv);
+
+	return $output;
+}
+
+function deprecated_tunl_gateway_decrypt_key_function($ivCiphertextB64)
 {
 
 	$ivCiphertext = base64_decode($ivCiphertextB64);
