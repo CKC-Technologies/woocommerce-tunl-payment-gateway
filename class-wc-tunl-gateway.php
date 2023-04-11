@@ -5,7 +5,7 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.9
+Version: 1.0.10
 */
 
 /** Define the Tunl Payment Method Url */
@@ -690,7 +690,7 @@ function tunl_gateway_wc_admin_connect_to_api()
 	}
 
 	/** once authentication process done then save the token and merchantId save */
-	
+
 	// set defaults
 	$myOptions['enabled'] = 'no';
 	$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
