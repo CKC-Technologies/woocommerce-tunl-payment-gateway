@@ -472,9 +472,8 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$country = $order->get_billing_country();
 			$postcode = $order->get_billing_postcode();
 
-			if (empty($postcode)) {
+			if (empty($postcode))
 				$postcode = $order->get_shipping_postcode();
-			}
 
 			$orderid = $order->get_id();
 			$gettotal = $order->get_total();
@@ -483,12 +482,8 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$myOptions = get_option('woocommerce_tunl_settings');
 			$auth = $myOptions['tunl_token'];
 
-			/** Payment process with tunl payment api */
-			if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-				$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-			} else {
-				$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-			}
+			$apiMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
+			$apiUrl = $apiMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
 
 			$account = sanitize_text_field($_POST['tunl_cardnumber']);
 			$expiryDate = sanitize_text_field($_POST['tunl_expirydate']);
@@ -517,6 +512,8 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'action' => 'sale',
 			);
 
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'];
+			$url = $apiUrl . $apiPath;
 			$response = wp_remote_post(
 				$url,
 				array(
@@ -530,41 +527,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				)
 			);
 
-			if (!is_wp_error($response)) {
-				$resultData = json_decode($response['body'], true);
-
-				/** Once Payment is complete and success then save paymentID ( ttid ) */
-				if ($resultData['phardcode'] == 'SUCCESS') {
-					$order->payment_complete();
-
-					update_post_meta($orderid, 'tunl_paymentid', $resultData['ttid']);
-					update_post_meta($orderid, 'check_tunlpayment', 1);
-
-					/** Some notes to customer (replace true with false to make it private) */
-					$note = "Tunl payment complete - Payment ID: " . $resultData['ttid'];
-					$order->add_order_note($note, true);
-
-					/** Empty cart */
-					$woocommerce->cart->empty_cart();
-
-					/** Redirect to the thank you page */
-					return array(
-						'result' => 'success',
-						'redirect' => $this->get_return_url($order),
-					);
-
-				} else {
-
-					/** If Payment process is failed */
-					wc_add_notice('Payment failed. Please try again.', 'error');
-					return array(
-						'result' => 'error',
-						'message' => 'Payment failed. Please try again.',
-					);
-				}
-
-			} else {
-
+			if (is_wp_error($response)) {
 				/** If connection error while using payment process flow */
 				wc_add_notice('Unknown Wordpress Error in Processing Payment.', 'error');
 				return array(
@@ -572,6 +535,39 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 					'message' => 'Unknown Wordpress Error in Processing Payment.',
 				);
 			}
+
+			$resultData = json_decode($response['body'], true);
+
+			/** Once Payment is complete and success then save paymentID ( ttid ) */
+			if ($resultData['phardcode'] == 'SUCCESS') {
+				$order->payment_complete();
+
+				update_post_meta($orderid, 'tunl_paymentid', $resultData['ttid']);
+				update_post_meta($orderid, 'check_tunlpayment', 1);
+
+				/** Some notes to customer (replace true with false to make it private) */
+				$note = "Tunl payment complete - Payment ID: " . $resultData['ttid'];
+				$order->add_order_note($note, true);
+
+				/** Empty cart */
+				$woocommerce->cart->empty_cart();
+
+				/** Redirect to the thank you page */
+				return array(
+					'result' => 'success',
+					'redirect' => $this->get_return_url($order),
+				);
+
+			} else {
+				/** If Payment process is failed */
+				wc_add_notice('Payment failed. Please try again.', 'error');
+				return array(
+					'result' => 'error',
+					'message' => 'Payment failed. Please try again.',
+				);
+			}
+
+
 		}
 	}
 }
