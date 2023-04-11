@@ -686,39 +686,40 @@ function tunl_gateway_wc_admin_connect_to_api()
 			'message' => "Authentication error. Please check your Tunl API Key/Secret and try again.",
 			'data' => array(),
 		);
-	} else {
-
-		/** once authentication process done then save the token and merchantId save */
-		if (isset($_POST['tunl_enabled'])) {
-			$myOptions['enabled'] = 'yes';
-		} else {
-			$myOptions['enabled'] = 'no';
-		}
-
-		if (isset($_POST['api_mode']) && $_POST['api_mode'] == "yes") {
-			$myOptions['api_mode'] = 'yes';
-			$myOptions['username'] = $username;
-			$myOptions['password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
-			$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-
-		} else {
-			$myOptions['api_mode'] = 'no';
-			$myOptions['live_username'] = $username;
-			$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
-			$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-		}
-
-		$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
-		$myOptions['connect_button'] = 2;
-		$myOptions['tunl_token'] = $resultData['token'];
-		$myOptions['tunl_merchantId'] = $resultData['user']['id'];
-		update_option('woocommerce_tunl_settings', $myOptions);
-		$resultingData = array(
-			'status' => true,
-			'message' => 'Your Tunl gateway is connected.',
-			'data' => $resultData,
-		);
+		return wp_send_json($resultingData);
 	}
+
+	/** once authentication process done then save the token and merchantId save */
+	
+	// set defaults
+	$myOptions['enabled'] = 'no';
+	$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
+	$myOptions['connect_button'] = 2;
+	$myOptions['tunl_token'] = $resultData['token'];
+	$myOptions['tunl_merchantId'] = $resultData['user']['id'];
+	$myOptions['api_mode'] = 'no';
+	$myOptions['live_username'] = $username;
+	$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
+	$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
+
+	if (isset($_POST['tunl_enabled']))
+		$myOptions['enabled'] = 'yes';
+
+	if (isset($_POST['api_mode']) && $_POST['api_mode'] == "yes") {
+		$myOptions['api_mode'] = 'yes';
+		$myOptions['username'] = $username;
+		$myOptions['password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
+		$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
+	}
+
+	update_option('woocommerce_tunl_settings', $myOptions);
+
+	$resultingData = array(
+		'status' => true,
+		'message' => 'Your Tunl gateway is connected.',
+		'data' => $resultData,
+	);
+
 	wp_send_json($resultingData);
 }
 add_action('wp_ajax_tunl_gateway_wc_admin_connect_to_api', 'tunl_gateway_wc_admin_connect_to_api');
