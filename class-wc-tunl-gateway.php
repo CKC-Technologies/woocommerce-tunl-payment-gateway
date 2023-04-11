@@ -74,7 +74,7 @@ function tunl_gateway_v108_to_v109_upgrade()
 
 		$valuesToFix = ['saved_password', 'saved_live_password'];
 
-		foreach($valuesToFix as $valueToFix){
+		foreach ($valuesToFix as $valueToFix) {
 			$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
 			$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
 		}
@@ -152,53 +152,39 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 			$myOptions = get_option('woocommerce_tunl_settings');
 
-			if (isset($_POST['woocommerce_tunl_enabled'])) {
+			// set defaults
+			$myOptions['enabled'] = 'no';
+			$myOptions['api_mode'] = 'no';
+			$myOptions['title'] = '';
+			$username = '';
+			$password = '';
+			$liveusername = '';
+			$livepassword = '';
+			$buttonConnect = '';
+
+			if (isset($_POST['woocommerce_tunl_enabled']))
 				$myOptions['enabled'] = 'yes';
-			} else {
-				$myOptions['enabled'] = 'no';
-			}
 
-			if (isset($_POST['woocommerce_tunl_api_mode'])) {
+			if (isset($_POST['woocommerce_tunl_api_mode']))
 				$myOptions['api_mode'] = 'yes';
-			} else {
-				$myOptions['api_mode'] = 'no';
-			}
 
-			if (isset($_POST['woocommerce_tunl_title'])) {
+			if (isset($_POST['woocommerce_tunl_title']))
 				$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_title']));
-			} else {
-				$myOptions['title'] = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_username'])) {
+			if (isset($_POST['woocommerce_tunl_username']))
 				$username = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_username']));
-			} else {
-				$username = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_password'])) {
+			if (isset($_POST['woocommerce_tunl_password']))
 				$password = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_password']));
-			} else {
-				$password = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_live_username'])) {
+			if (isset($_POST['woocommerce_tunl_live_username']))
 				$liveusername = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_live_username']));
-			} else {
-				$liveusername = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_live_password'])) {
+			if (isset($_POST['woocommerce_tunl_live_password']))
 				$livepassword = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_live_password']));
-			} else {
-				$livepassword = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_connect_button'])) {
+			if (isset($_POST['woocommerce_tunl_connect_button']))
 				$buttonConnect = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_connect_button']));
-			} else {
-				$buttonConnect = '';
-			}
 
 			$passwordIsNotMasked = strlen(str_replace('*', '', $password)) > 4;
 			$livePassIsNotMasked = strlen(str_replace('*', '', $livepassword)) > 4;
@@ -209,13 +195,11 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$myOptions['live_username'] = $liveusername;
 			$myOptions['live_password'] = mask($livepassword);
 
-			if ($passwordIsNotMasked) {
+			if ($passwordIsNotMasked)
 				$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-			}
 
-			if ($livePassIsNotMasked) {
+			if ($livePassIsNotMasked)
 				$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $livepassword);
-			}
 
 			do_action('woocommerce_update_option', array('id' => 'woocommerce_tunl_settings'));
 			update_option('woocommerce_tunl_settings', $myOptions);
@@ -434,15 +418,17 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 					/** Get the payment details using tunl payment api */
 
-					$response = wp_remote_post($url, array(
+					$response = wp_remote_post(
+						$url,
+						array(
 
-						'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+							'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
 
-						'method' => 'GET',
+							'method' => 'GET',
 
-						'data_format' => 'body',
+							'data_format' => 'body',
 
-					)
+						)
 					);
 
 					$resutData = json_decode($response['body'], true);
@@ -475,17 +461,19 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 					/** Admin cancelled order then return payment to user process with tunl payment api */
 
-					$response = wp_remote_post($url, array(
+					$response = wp_remote_post(
+						$url,
+						array(
 
-						'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+							'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
 
-						'body' => wp_json_encode($body),
+							'body' => wp_json_encode($body),
 
-						'method' => 'POST',
+							'method' => 'POST',
 
-						'data_format' => 'body',
+							'data_format' => 'body',
 
-					)
+						)
 					);
 
 					$resultData = json_decode($response['body'], true);
@@ -865,12 +853,14 @@ function tunl_gateway_checkout_validation_unique_error($data, $errors)
 				);
 
 				/** authentication process with tunl payment api */
-				$response = wp_remote_post($url, array(
-					'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
-					'body' => wp_json_encode($body),
-					'method' => 'POST',
-					'data_format' => 'body',
-				)
+				$response = wp_remote_post(
+					$url,
+					array(
+						'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
+						'body' => wp_json_encode($body),
+						'method' => 'POST',
+						'data_format' => 'body',
+					)
 				);
 				$resultData = json_decode($response['body'], true);
 
@@ -922,12 +912,14 @@ function auth_get_token($errors = null)
 	);
 
 	/** authentication process with tunl payment api */
-	$request = wp_remote_post($url, array(
-		'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
-		'body' => wp_json_encode($body),
-		'method' => 'POST',
-		'data_format' => 'body',
-	)
+	$request = wp_remote_post(
+		$url,
+		array(
+			'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
+			'body' => wp_json_encode($body),
+			'method' => 'POST',
+			'data_format' => 'body',
+		)
 	);
 
 	if (is_wp_error($request)) {
@@ -997,13 +989,13 @@ function tunl_gateway_encrypt_key_function($plaintext)
 	$secret_key = $myOptions['secret_key'];
 	$secret_iv = bin2hex(random_bytes(16));
 	// hash
-	$key = hash('sha256', $secret_key);    
+	$key = hash('sha256', $secret_key);
 	// iv - encrypt method AES-256-CBC expects 16 bytes 
 	$iv = substr(hash('sha256', $secret_iv), 0, 16);
 
 	$output = openssl_encrypt($plaintext, $encrypt_method, $key, 0, $iv);
 	$output = $secret_iv . base64_encode($output);
-	
+
 	return $output;
 
 }
@@ -1027,14 +1019,14 @@ add_filter('deprecated_tunl_gateway_decrypt_filter', 'deprecated_tunl_gateway_de
 
 function tunl_gateway_decrypt_key_function($ivCiphertextB64)
 {
-	
+
 	$output = false;
 	$encrypt_method = "AES-256-CBC";
 	$myOptions = get_option("woocommerce_tunl_settings");
 	$secret_key = $myOptions['secret_key'];
 	$secret_iv = substr($ivCiphertextB64, 0, 32);
 	// hash
-	$key = hash('sha256', $secret_key);    
+	$key = hash('sha256', $secret_key);
 	// iv - encrypt method AES-256-CBC expects 16 bytes 
 	$iv = substr(hash('sha256', $secret_iv), 0, 16);
 	$cipherText = substr($ivCiphertextB64, 32);
