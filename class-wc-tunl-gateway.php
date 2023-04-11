@@ -348,139 +348,87 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 		public function process_refund($orderId, $amount = null, $reason = '')
 		{
 
-			if ($_POST['line_item_tax_totals']) {
-				// json_decode safely returns null on failure to parse;
+			if (empty($_POST['refund_amount']))
+				return false;
+
+			$taxTotals = array();
+			$taxRefund = 0;
+			$totalAmountRefund = floatval(sanitize_text_field($_POST['refund_amount']));
+			$setReason = '';
+
+			if (!empty($_POST['refund_reason']))
+				$setReason = sanitize_text_field(wp_unslash($_POST['refund_reason']));
+
+			if ($_POST['line_item_tax_totals'])
 				$taxTotals = json_decode($_POST['line_item_tax_totals'], true);
+
+			foreach ($taxTotals as $single_item) {
+				$taxRefund = $taxRefund + array_sum($single_item);
+			}
+
+			$tunlPaymentId = get_post_meta($orderId, 'tunl_paymentid');
+			$checkPayment = get_post_meta($orderId, 'check_tunlpayment');
+
+			if (empty($checkPayment[0]))
+				return false;
+
+			$myOptions = get_option('woocommerce_tunl_settings');
+
+			$apiMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
+			$apiUrl = $apiMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
+
+			$auth = auth_get_token();
+
+			/** Get the payment details using tunl payment api */
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
+			$url = $apiUrl . $apiPath;
+			$response = wp_remote_post(
+				$url,
+				array(
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+					'method' => 'GET',
+					'data_format' => 'body',
+				)
+			);
+
+			$resutData = json_decode($response['body'], true);
+
+			$body = array(
+				'accountId' => $resutData['contactAccount']['id'],
+				'contactId' => $resutData['contact']['id'],
+				'amount' => $totalAmountRefund,
+				'tax' => $taxRefund,
+				'ordernum' => $orderId,
+				'action' => 'return'
+			);
+
+			/** Issue refund via Tunl API */
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'];
+			$url = $apiUrl . $apiPath;
+			$response = wp_remote_post(
+				$url,
+				array(
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+					'body' => wp_json_encode($body),
+					'method' => 'POST',
+					'data_format' => 'body',
+				)
+			);
+
+			$resultData = json_decode($response['body'], true);
+
+			if ($resultData['code'] != 'PaymentException') {
+				/** Some notes to customer (replace true with false to make it private) */
+				$order = new WC_Order($orderId);
+				$note = "Refunded $" . $totalAmountRefund . " - Refund ID: " . $resultData['ttid'] . " - Reason: " . $setReason;
+				$order->add_order_note(esc_html($note));
+				$order->save();
+				return add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
 			} else {
-				$taxTotals = array();
+				$order = new WC_Order($orderId);
+				$order->save();
+				throw new Exception(__('Refund failed. Tunl refund was unsuccessful.', 'woocommerce'));
 			}
-
-			if (!empty($_POST['refund_amount'])) {
-
-				$totalAmountRefund = floatval($_POST['refund_amount']);
-
-				$taxRefund = 0;
-
-				foreach ($taxTotals as $single_item) {
-
-					$taxRefund = $taxRefund + array_sum($single_item);
-
-				}
-
-				$tunlPaymentId = get_post_meta($orderId, 'tunl_paymentid');
-
-				$checkPayment = get_post_meta($orderId, 'check_tunlpayment');
-
-				if (!empty($checkPayment[0])) {
-
-					$myOptions = get_option('woocommerce_tunl_settings');
-
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-
-						$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
-
-					} else {
-
-						$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
-
-					}
-
-					$auth = auth_get_token();
-
-					/** Get the payment details using tunl payment api */
-
-					$response = wp_remote_post(
-						$url,
-						array(
-
-							'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
-
-							'method' => 'GET',
-
-							'data_format' => 'body',
-
-						)
-					);
-
-					$resutData = json_decode($response['body'], true);
-
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-
-						$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-
-					} else {
-
-						$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-
-					}
-
-					$body = array(
-
-						'accountId' => $resutData['contactAccount']['id'],
-
-						'contactId' => $resutData['contact']['id'],
-
-						'amount' => $totalAmountRefund,
-
-						'tax' => $taxRefund,
-
-						'ordernum' => $orderId,
-
-						'action' => 'return'
-
-					);
-
-					/** Admin cancelled order then return payment to user process with tunl payment api */
-
-					$response = wp_remote_post(
-						$url,
-						array(
-
-							'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
-
-							'body' => wp_json_encode($body),
-
-							'method' => 'POST',
-
-							'data_format' => 'body',
-
-						)
-					);
-
-					$resultData = json_decode($response['body'], true);
-
-
-					if ($resultData['code'] != 'PaymentException') {
-						/** Some notes to customer (replace true with false to make it private) */
-						$order = new WC_Order($orderId);
-						$totalAmountRefund = sanitize_text_field($_POST['refund_amount']);
-
-						if (empty($_POST['refund_reason'])) {
-							$setReason = '';
-						} else {
-							$setReason = sanitize_text_field(wp_unslash($_POST['refund_reason']));
-						}
-						$note = "Refunded $" . $totalAmountRefund . " - Refund ID: " . $resultData['ttid'] . " - Reason: " . $setReason;
-						$order->add_order_note(esc_html($note));
-						$order->save();
-
-						return add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
-
-					} else {
-
-						$order = new WC_Order($orderId);
-						/** $note = "Tunl refund failed"; */
-						/** $order->add_order_note( $note ); */
-
-						$order->save();
-
-						throw new Exception(__('Refund failed. Tunl refund was unsuccessful.', 'woocommerce'));
-
-					}
-				}
-			}
-
-
 		}
 
 		private function validate_card_post_data($account, $expiryDate, $cardCode)
