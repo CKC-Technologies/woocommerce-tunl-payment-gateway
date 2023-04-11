@@ -269,102 +269,73 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'desc_tip' => false,
 			);
 
-
 			$this->form_fields = $arrayfields;
-
 		}
 
 		/** Load the credit card form fields */
 		public function payment_fields()
-		{ ?>
+		{
+			$wp_kses_whitelist = array(
+				'label' => true,
+				'div' => array(
+					'class' => array(),
+				),
+				'span' => array(
+					'class' => array(),
+				),
+				'input' => array(
+					'type' => array(),
+					'name' => array(),
+					'value' => array(),
+					'autocomplete' => array(),
+					'class' => array(),
+					'maxlength' => array(),
+					'placeholder' => array(),
+					'id' => array(),
+				),
+			);
+
+			$cardNumberInput = wp_kses(
+				sprintf(
+					__('<label>Card Number <span class="required">*</span></label>
+							<div class="card_number_input">
+							<input id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
+							</div>')
+				),
+				$wp_kses_whitelist
+			);
+
+			$expireInput = wp_kses(
+				sprintf(
+					__('<label>Expiration Date <span class="required">*</span></label>
+							<input id="tunl_expdate" type="text" placeholder="MM / YY" class="input-text" name="tunl_expirydate">')
+				),
+				$wp_kses_whitelist
+			);
+
+			$cvvInput = wp_kses(
+				sprintf(
+					__('<label>Security Code <span class="required">*</span></label>
+						<input id="tunl_cvc" type="password" placeholder="CVV" class="input-text" name="tunl_cardcode">')
+				),
+				$wp_kses_whitelist
+			);
+
+			?>
 			<fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class="wc-credit-card-form wc-payment-form tunlcform">
-				<?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
 				<?php
+				do_action('woocommerce_credit_card_form_start', $this->id);
 				echo sprintf(
-					'<div class="form-row form-row-wide cardNumberInput">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Card Number <span class="required">*</span></label>
-									<div class="card_number_input">
-									<input id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
-									</div>')
-						),
-						array(
-							'label' => true,
-							'div' => array(
-								'class' => array(),
-							),
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'maxlength' => array(),
-								'id' => array(),
-							),
-						)
-					)
+					'<div class="form-row form-row-wide cardNumberInput"> %s </div>
+					 <div class="form-row form-row-first"> %s </div>
+					 <div class="form-row form-row-last"> %s </div>
+					 ',
+					$cardNumberInput,
+					$expireInput,
+					$cvvInput
 				);
+				do_action('woocommerce_credit_card_form_end', $this->id);
 				?>
-				<?php
-				echo sprintf(
-					'<div class="form-row form-row-first">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Expiration Date <span class="required">*</span></label>
-									<input id="tunl_expdate" type="text" placeholder="MM / YY" class="input-text" name="tunl_expirydate">')
-						),
-						array(
-							'label' => true,
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'placeholder' => array(),
-								'id' => array(),
-							),
-						)
-					)
-				);
-				?>
-				<?php
-				echo sprintf(
-					'<div class="form-row form-row-last">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Security Code <span class="required">*</span></label>
-								<input id="tunl_cvc" type="password" placeholder="CVV" class="input-text" name="tunl_cardcode">')
-						),
-						array(
-							'label' => true,
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'placeholder' => array(),
-								'id' => array(),
-							),
-						)
-					)
-				);
-				?>
-				<div class="clear"></div>
-				<?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
-				<div class="clear"></div>
 			</fieldset>
 			<?php
 		}
