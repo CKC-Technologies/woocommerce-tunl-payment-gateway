@@ -61,7 +61,7 @@ function tunl_gateway_v108_to_v109_upgrade()
 {
 	// code to fix installs using the old deprecated encryption functions
 	$myOptions = get_option("woocommerce_tunl_settings");
-	$currentKey = $myOptions['secret_key'];
+	$currentKey = $myOptions['secret_encryption_key'];
 	if (!$currentKey) {
 		$myOptions['secret_encryption_key'] = bin2hex(random_bytes(32));
 		$currentKey = $myOptions['secret_encryption_key'];
@@ -814,7 +814,7 @@ function tunl_gateway_encrypt_key_function($plaintext)
 	$encrypt_method = "AES-256-CBC";
 
 	$myOptions = get_option("woocommerce_tunl_settings");
-	$secret_key = $myOptions['secret_key'];
+	$secret_key = $myOptions['secret_encryption_key'];
 	$secret_iv = bin2hex(random_bytes(16));
 	// hash
 	$key = hash('sha256', $secret_key);
@@ -851,7 +851,7 @@ function tunl_gateway_decrypt_key_function($ivCiphertextB64)
 	$output = false;
 	$encrypt_method = "AES-256-CBC";
 	$myOptions = get_option("woocommerce_tunl_settings");
-	$secret_key = $myOptions['secret_key'];
+	$secret_key = $myOptions['secret_encryption_key'];
 	$secret_iv = substr($ivCiphertextB64, 0, 32);
 	// hash
 	$key = hash('sha256', $secret_key);
