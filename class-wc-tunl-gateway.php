@@ -5,7 +5,7 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.9
+Version: 1.0.10
 */
 
 /** Define the Tunl Payment Method Url */
@@ -25,7 +25,7 @@ add_action('plugins_loaded', 'woocommerce_gateway_tunl_check_wc');
 function woocommerce_gateway_tunl_check_wc()
 {
 	if (!class_exists('WooCommerce')) {
-		add_action('admin_notices', 'woocommerce_tunl_missing_wc_notice');
+		add_action('admin_notices', 'tunl_gateway_woocommerce_tunl_missing_wc_notice');
 		return true;
 	}
 }
@@ -33,8 +33,6 @@ function woocommerce_gateway_tunl_check_wc()
 if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 	return;
 }
-
-
 
 /**
  * Function Name : tunl_gateway_woocommerce_plugin_activate
@@ -48,17 +46,13 @@ function tunl_gateway_woocommerce_plugin_activate()
 
 register_activation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_activate');
 
-
-
 /**
  * Function Name : tunl_gateway_woocommerce_plugin_deactivate
  */
 function tunl_gateway_woocommerce_plugin_deactivate()
 {
-
 	/**  Reset the tunl payment method form field */
 	// delete_option('woocommerce_tunl_settings');
-
 }
 
 register_deactivation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_deactivate');
@@ -74,7 +68,7 @@ function tunl_gateway_v108_to_v109_upgrade()
 
 		$valuesToFix = ['saved_password', 'saved_live_password'];
 
-		foreach($valuesToFix as $valueToFix){
+		foreach ($valuesToFix as $valueToFix) {
 			$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
 			$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
 		}
@@ -82,8 +76,6 @@ function tunl_gateway_v108_to_v109_upgrade()
 		update_option("woocommerce_tunl_settings", $myOptions);
 	}
 }
-
-
 
 /**  Initialize Tunl Class */
 
@@ -107,39 +99,26 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 		{
 
 			/** Set the fields text for payment methods  */
-
 			$this->id = 'tunl';
-
 			$this->icon = '';
-
 			$this->has_fields = true;
-
 			$this->title = __('Tunl', 'tunlwoopay');
-
 			$this->method_title = __('Tunl', 'tunlwoopay');
-
 			$desp = 'Tunl works by adding payment fields on the checkout and then sending the details to Tunl for verification.';
-
 			$this->method_description = __($desp, 'tunlwoopay');
 
 			/** Load the default credit card form */
-
 			$this->supports = array('default_credit_card_form', 'refunds');
 
 			/** Load backend options fields */
-
 			$this->init_form_fields();
 
 			/** Load the settings. */
-
 			$this->init_settings();
-
 			$this->enabled = $this->get_option('enabled');
-
 			$this->title = $this->get_option('title');
 
 			/** Action hook to save the settings */
-
 			if (is_admin()) {
 				add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'save_tunlpayment'));
 			}
@@ -149,73 +128,56 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 		/**  Save Tunl Payment Methods Fields */
 		public function save_tunlpayment()
 		{
-
 			$myOptions = get_option('woocommerce_tunl_settings');
 
-			if (isset($_POST['woocommerce_tunl_enabled'])) {
+			// set defaults
+			$myOptions['enabled'] = 'no';
+			$myOptions['api_mode'] = 'no';
+			$myOptions['title'] = '';
+			$username = '';
+			$password = '';
+			$liveusername = '';
+			$livepassword = '';
+			$buttonConnect = '';
+
+			if (isset($_POST['woocommerce_tunl_enabled']))
 				$myOptions['enabled'] = 'yes';
-			} else {
-				$myOptions['enabled'] = 'no';
-			}
 
-			if (isset($_POST['woocommerce_tunl_api_mode'])) {
+			if (isset($_POST['woocommerce_tunl_api_mode']))
 				$myOptions['api_mode'] = 'yes';
-			} else {
-				$myOptions['api_mode'] = 'no';
-			}
 
-			if (isset($_POST['woocommerce_tunl_title'])) {
+			if (isset($_POST['woocommerce_tunl_title']))
 				$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_title']));
-			} else {
-				$myOptions['title'] = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_username'])) {
+			if (isset($_POST['woocommerce_tunl_username']))
 				$username = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_username']));
-			} else {
-				$username = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_password'])) {
+			if (isset($_POST['woocommerce_tunl_password']))
 				$password = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_password']));
-			} else {
-				$password = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_live_username'])) {
+			if (isset($_POST['woocommerce_tunl_live_username']))
 				$liveusername = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_live_username']));
-			} else {
-				$liveusername = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_live_password'])) {
+			if (isset($_POST['woocommerce_tunl_live_password']))
 				$livepassword = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_live_password']));
-			} else {
-				$livepassword = '';
-			}
 
-			if (isset($_POST['woocommerce_tunl_connect_button'])) {
+			if (isset($_POST['woocommerce_tunl_connect_button']))
 				$buttonConnect = sanitize_text_field(wp_unslash($_POST['woocommerce_tunl_connect_button']));
-			} else {
-				$buttonConnect = '';
-			}
 
 			$passwordIsNotMasked = strlen(str_replace('*', '', $password)) > 4;
 			$livePassIsNotMasked = strlen(str_replace('*', '', $livepassword)) > 4;
 
 			$myOptions['connect_button'] = $buttonConnect;
 			$myOptions['username'] = $username;
-			$myOptions['password'] = mask($password);
+			$myOptions['password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
 			$myOptions['live_username'] = $liveusername;
-			$myOptions['live_password'] = mask($livepassword);
+			$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($livepassword);
 
-			if ($passwordIsNotMasked) {
+			if ($passwordIsNotMasked)
 				$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-			}
 
-			if ($livePassIsNotMasked) {
+			if ($livePassIsNotMasked)
 				$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $livepassword);
-			}
 
 			do_action('woocommerce_update_option', array('id' => 'woocommerce_tunl_settings'));
 			update_option('woocommerce_tunl_settings', $myOptions);
@@ -285,104 +247,125 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'desc_tip' => false,
 			);
 
-
 			$this->form_fields = $arrayfields;
-
 		}
 
 		/** Load the credit card form fields */
 		public function payment_fields()
-		{ ?>
+		{
+			$wp_kses_whitelist = array(
+				'label' => true,
+				'div' => array(
+					'class' => array(),
+				),
+				'span' => array(
+					'class' => array(),
+				),
+				'input' => array(
+					'type' => array(),
+					'name' => array(),
+					'value' => array(),
+					'autocomplete' => array(),
+					'class' => array(),
+					'maxlength' => array(),
+					'placeholder' => array(),
+					'id' => array(),
+				),
+			);
+
+			$cardNumberInput = wp_kses(
+				sprintf(
+					__('<label>Card Number <span class="required">*</span></label>
+							<div class="card_number_input">
+							<input id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
+							</div>')
+				),
+				$wp_kses_whitelist
+			);
+
+			$expireInput = wp_kses(
+				sprintf(
+					__('<label>Expiration Date <span class="required">*</span></label>
+							<input id="tunl_expdate" type="text" placeholder="MM / YY" class="input-text" name="tunl_expirydate">')
+				),
+				$wp_kses_whitelist
+			);
+
+			$cvvInput = wp_kses(
+				sprintf(
+					__('<label>Security Code <span class="required">*</span></label>
+						<input id="tunl_cvc" type="password" placeholder="CVV" class="input-text" name="tunl_cardcode">')
+				),
+				$wp_kses_whitelist
+			);
+
+			?>
 			<fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class="wc-credit-card-form wc-payment-form tunlcform">
-				<?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
 				<?php
+				do_action('woocommerce_credit_card_form_start', $this->id);
 				echo sprintf(
-					'<div class="form-row form-row-wide cardNumberInput">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Card Number <span class="required">*</span></label>
-									<div class="card_number_input">
-									<input id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
-									</div>')
-						),
-						array(
-							'label' => true,
-							'div' => array(
-								'class' => array(),
-							),
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'maxlength' => array(),
-								'id' => array(),
-							),
-						)
-					)
+					'<div class="form-row form-row-wide cardNumberInput"> %s </div>
+					 <div class="form-row form-row-first"> %s </div>
+					 <div class="form-row form-row-last"> %s </div>
+					 ',
+					$cardNumberInput,
+					$expireInput,
+					$cvvInput
 				);
+				do_action('woocommerce_credit_card_form_end', $this->id);
 				?>
-				<?php
-				echo sprintf(
-					'<div class="form-row form-row-first">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Expiration Date <span class="required">*</span></label>
-									<input id="tunl_expdate" type="text" placeholder="MM / YY" class="input-text" name="tunl_expirydate">')
-						),
-						array(
-							'label' => true,
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'placeholder' => array(),
-								'id' => array(),
-							),
-						)
-					)
-				);
-				?>
-				<?php
-				echo sprintf(
-					'<div class="form-row form-row-last">%s</div>',
-					wp_kses(
-						sprintf(
-							__('<label>Security Code <span class="required">*</span></label>
-								<input id="tunl_cvc" type="password" placeholder="CVV" class="input-text" name="tunl_cardcode">')
-						),
-						array(
-							'label' => true,
-							'span' => array(
-								'class' => array(),
-							),
-							'input' => array(
-								'type' => array(),
-								'name' => array(),
-								'value' => array(),
-								'autocomplete' => array(),
-								'class' => array(),
-								'placeholder' => array(),
-								'id' => array(),
-							),
-						)
-					)
-				);
-				?>
-				<div class="clear"></div>
-				<?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
-				<div class="clear"></div>
 			</fieldset>
 			<?php
+		}
+
+		function auth_get_token($errors = null)
+		{
+
+			$myOptions = get_option('woocommerce_tunl_settings');
+
+			$testApiKey = $myOptions['username'];
+			$testSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_password']);
+			$testUrl = TUNL_TEST_URL . '/auth';
+			$liveApiKey = $myOptions['live_username'];
+			$liveSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_live_password']);
+			$liveUrl = TUNL_LIVE_URL . '/auth';
+			$prodMode = (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no'));
+
+			$apiKey = $prodMode ? $liveApiKey : $testApiKey;
+			$secret = $prodMode ? $liveSecret : $testSecret;
+			$url = $prodMode ? $liveUrl : $testUrl;
+
+			$body = array(
+				'username' => $apiKey,
+				'password' => $secret,
+				'scope' => 'PAYMENT_WRITE',
+				'lifespan' => 15,
+			);
+
+			/** authentication process with tunl payment api */
+			$request = wp_remote_post(
+				$url,
+				array(
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
+					'body' => wp_json_encode($body),
+					'method' => 'POST',
+					'data_format' => 'body',
+				)
+			);
+
+			if (is_wp_error($request))
+				throw new Exception(__('Unknown Wordpress Error in Get Auth Token', 'woocommerce'));
+
+			if (wp_remote_retrieve_response_code($request) == 401)
+				throw new Exception(__('Authentication error. Please check your Tunl Tunl API Key/Secret and try again.', 'woocommerce'));
+
+			$resultData = json_decode($request['body'], true);
+
+			$token = $resultData['token'];
+			$tokenSet = isset($token);
+			!$tokenSet && throw new Exception(__('Tunl is temporarily unavailable. Please try again later.', 'woocommerce'));
+
+			return $token;
 		}
 
 		/**
@@ -393,135 +376,87 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 		public function process_refund($orderId, $amount = null, $reason = '')
 		{
 
-			if ($_POST['line_item_tax_totals']) {
-				// json_decode safely returns null on failure to parse;
+			if (empty($_POST['refund_amount']))
+				return false;
+
+			$taxTotals = array();
+			$taxRefund = 0;
+			$totalAmountRefund = floatval(sanitize_text_field($_POST['refund_amount']));
+			$setReason = '';
+
+			if (!empty($_POST['refund_reason']))
+				$setReason = sanitize_text_field(wp_unslash($_POST['refund_reason']));
+
+			if ($_POST['line_item_tax_totals'])
 				$taxTotals = json_decode($_POST['line_item_tax_totals'], true);
+
+			foreach ($taxTotals as $single_item) {
+				$taxRefund = $taxRefund + array_sum($single_item);
+			}
+
+			$tunlPaymentId = get_post_meta($orderId, 'tunl_paymentid');
+			$checkPayment = get_post_meta($orderId, 'check_tunlpayment');
+
+			if (empty($checkPayment[0]))
+				return false;
+
+			$myOptions = get_option('woocommerce_tunl_settings');
+
+			$prodMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
+			$apiUrl = $prodMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
+
+			$auth = $this->auth_get_token();
+
+			/** Get the payment details using tunl payment api */
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
+			$url = $apiUrl . $apiPath;
+			$response = wp_remote_post(
+				$url,
+				array(
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+					'method' => 'GET',
+					'data_format' => 'body',
+				)
+			);
+
+			$resutData = json_decode($response['body'], true);
+
+			$body = array(
+				'accountId' => $resutData['contactAccount']['id'],
+				'contactId' => $resutData['contact']['id'],
+				'amount' => $totalAmountRefund,
+				'tax' => $taxRefund,
+				'ordernum' => $orderId,
+				'action' => 'return'
+			);
+
+			/** Issue refund via Tunl API */
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'];
+			$url = $apiUrl . $apiPath;
+			$response = wp_remote_post(
+				$url,
+				array(
+					'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
+					'body' => wp_json_encode($body),
+					'method' => 'POST',
+					'data_format' => 'body',
+				)
+			);
+
+			$resultData = json_decode($response['body'], true);
+
+			if ($resultData['code'] != 'PaymentException') {
+				/** Some notes to customer (replace true with false to make it private) */
+				$order = new WC_Order($orderId);
+				$note = "Refunded $" . $totalAmountRefund . " - Refund ID: " . $resultData['ttid'] . " - Reason: " . $setReason;
+				$order->add_order_note(esc_html($note));
+				$order->save();
+				return add_action('woocommerce_order_refunded', 'tunl_gateway_action_woocommerce_order_refunded', 10, 2);
 			} else {
-				$taxTotals = array();
+				$order = new WC_Order($orderId);
+				$order->save();
+				throw new Exception(__('Refund failed. Tunl refund was unsuccessful.', 'woocommerce'));
 			}
-
-			if (!empty($_POST['refund_amount'])) {
-
-				$totalAmountRefund = floatval($_POST['refund_amount']);
-
-				$taxRefund = 0;
-
-				foreach ($taxTotals as $single_item) {
-
-					$taxRefund = $taxRefund + array_sum($single_item);
-
-				}
-
-				$tunlPaymentId = get_post_meta($orderId, 'tunl_paymentid');
-
-				$checkPayment = get_post_meta($orderId, 'check_tunlpayment');
-
-				if (!empty($checkPayment[0])) {
-
-					$myOptions = get_option('woocommerce_tunl_settings');
-
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-
-						$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
-
-					} else {
-
-						$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'] . '/' . $tunlPaymentId[0];
-
-					}
-
-					$auth = auth_get_token();
-
-					/** Get the payment details using tunl payment api */
-
-					$response = wp_remote_post($url, array(
-
-						'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
-
-						'method' => 'GET',
-
-						'data_format' => 'body',
-
-					)
-					);
-
-					$resutData = json_decode($response['body'], true);
-
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-
-						$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-
-					} else {
-
-						$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-
-					}
-
-					$body = array(
-
-						'accountId' => $resutData['contactAccount']['id'],
-
-						'contactId' => $resutData['contact']['id'],
-
-						'amount' => $totalAmountRefund,
-
-						'tax' => $taxRefund,
-
-						'ordernum' => $orderId,
-
-						'action' => 'return'
-
-					);
-
-					/** Admin cancelled order then return payment to user process with tunl payment api */
-
-					$response = wp_remote_post($url, array(
-
-						'headers' => array('Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer ' . $auth),
-
-						'body' => wp_json_encode($body),
-
-						'method' => 'POST',
-
-						'data_format' => 'body',
-
-					)
-					);
-
-					$resultData = json_decode($response['body'], true);
-
-
-					if ($resultData['code'] != 'PaymentException') {
-						/** Some notes to customer (replace true with false to make it private) */
-						$order = new WC_Order($orderId);
-						$totalAmountRefund = sanitize_text_field($_POST['refund_amount']);
-
-						if (empty($_POST['refund_reason'])) {
-							$setReason = '';
-						} else {
-							$setReason = sanitize_text_field(wp_unslash($_POST['refund_reason']));
-						}
-						$note = "Refunded $" . $totalAmountRefund . " - Refund ID: " . $resultData['ttid'] . " - Reason: " . $setReason;
-						$order->add_order_note(esc_html($note));
-						$order->save();
-
-						return add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
-
-					} else {
-
-						$order = new WC_Order($orderId);
-						/** $note = "Tunl refund failed"; */
-						/** $order->add_order_note( $note ); */
-
-						$order->save();
-
-						throw new Exception(__('Refund failed. Tunl refund was unsuccessful.', 'woocommerce'));
-
-					}
-				}
-			}
-
-
 		}
 
 		private function validate_card_post_data($account, $expiryDate, $cardCode)
@@ -565,23 +500,18 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$country = $order->get_billing_country();
 			$postcode = $order->get_billing_postcode();
 
-			if (empty($postcode)) {
+			if (empty($postcode))
 				$postcode = $order->get_shipping_postcode();
-			}
 
 			$orderid = $order->get_id();
 			$gettotal = $order->get_total();
 			$gettotaltax = $order->get_total_tax();
 			$orderaddress = $addressorder . ', ' . $country . ', ' . $state . ', ' . $city;
 			$myOptions = get_option('woocommerce_tunl_settings');
-			$auth = $myOptions['tunl_token'];
+			$auth = $this->auth_get_token();
 
-			/** Payment process with tunl payment api */
-			if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-				$url = TUNL_LIVE_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-			} else {
-				$url = TUNL_TEST_URL . '/payments/merchant/' . $myOptions['tunl_merchantId'];
-			}
+			$prodMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
+			$apiUrl = $prodMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
 
 			$account = sanitize_text_field($_POST['tunl_cardnumber']);
 			$expiryDate = sanitize_text_field($_POST['tunl_expirydate']);
@@ -610,6 +540,8 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'action' => 'sale',
 			);
 
+			$apiPath = '/payments/merchant/' . $myOptions['tunl_merchantId'];
+			$url = $apiUrl . $apiPath;
 			$response = wp_remote_post(
 				$url,
 				array(
@@ -623,48 +555,46 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				)
 			);
 
-			if (!is_wp_error($response)) {
-				$resultData = json_decode($response['body'], true);
-
-				/** Once Payment is complete and success then save paymentID ( ttid ) */
-				if ($resultData['phardcode'] == 'SUCCESS') {
-					$order->payment_complete();
-
-					update_post_meta($orderid, 'tunl_paymentid', $resultData['ttid']);
-					update_post_meta($orderid, 'check_tunlpayment', 1);
-
-					/** Some notes to customer (replace true with false to make it private) */
-					$note = "Tunl payment complete - Payment ID: " . $resultData['ttid'];
-					$order->add_order_note($note, true);
-
-					/** Empty cart */
-					$woocommerce->cart->empty_cart();
-
-					/** Redirect to the thank you page */
-					return array(
-						'result' => 'success',
-						'redirect' => $this->get_return_url($order),
-					);
-
-				} else {
-
-					/** If Payment process is failed */
-					wc_add_notice('Payment failed. Please try again.', 'error');
-					return array(
-						'result' => 'error',
-						'message' => 'Payment failed. Please try again.',
-					);
-				}
-
-			} else {
-
-				/** If connection error while using payment process flow */
+			if (is_wp_error($response)) {
 				wc_add_notice('Unknown Wordpress Error in Processing Payment.', 'error');
 				return array(
 					'result' => 'error',
 					'message' => 'Unknown Wordpress Error in Processing Payment.',
 				);
 			}
+
+			$resultData = json_decode($response['body'], true);
+
+			/** Once Payment is complete and success then save paymentID ( ttid ) */
+			if ($resultData['phardcode'] == 'SUCCESS') {
+				$order->payment_complete();
+
+				update_post_meta($orderid, 'tunl_paymentid', $resultData['ttid']);
+				update_post_meta($orderid, 'check_tunlpayment', 1);
+
+				/** Some notes to customer (replace true with false to make it private) */
+				$note = "Tunl payment complete - Payment ID: " . $resultData['ttid'];
+				$order->add_order_note($note, true);
+
+				/** Empty cart */
+				$woocommerce->cart->empty_cart();
+
+				/** Redirect to the thank you page */
+				return array(
+					'result' => 'success',
+					'redirect' => $this->get_return_url($order),
+				);
+
+			} else {
+				/** If Payment process is failed */
+				wc_add_notice('Payment failed. Please try again.', 'error');
+				return array(
+					'result' => 'error',
+					'message' => 'Payment failed. Please try again.',
+				);
+			}
+
+
 		}
 	}
 }
@@ -727,12 +657,10 @@ function tunl_gateway_wc_admin_connect_to_api()
 	$last4ofCurrentPW = $prodMode ? substr($decryptedLivePW, -4) : substr($decryptedTestPW, -4);
 	$last4Match = $last4ofCurrentPW === $last4ofSubmittedPW;
 
-
 	$url = $prodMode ? TUNL_LIVE_URL . '/auth' : TUNL_TEST_URL . '/auth';
 
-	if ($last4Match) {
+	if ($last4Match)
 		$password = $prodMode ? $decryptedLivePW : $decryptedTestPW;
-	}
 
 	$body = array(
 		'username' => $username,
@@ -758,39 +686,40 @@ function tunl_gateway_wc_admin_connect_to_api()
 			'message' => "Authentication error. Please check your Tunl API Key/Secret and try again.",
 			'data' => array(),
 		);
-	} else {
-
-		/** once authentication process done then save the token and merchantId save */
-		if (isset($_POST['tunl_enabled'])) {
-			$myOptions['enabled'] = 'yes';
-		} else {
-			$myOptions['enabled'] = 'no';
-		}
-
-		if (isset($_POST['api_mode']) && $_POST['api_mode'] == "yes") {
-			$myOptions['api_mode'] = 'yes';
-			$myOptions['username'] = $username;
-			$myOptions['password'] = mask($password);
-			$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-
-		} else {
-			$myOptions['api_mode'] = 'no';
-			$myOptions['live_username'] = $username;
-			$myOptions['live_password'] = mask($password);
-			$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
-		}
-
-		$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
-		$myOptions['connect_button'] = 2;
-		$myOptions['tunl_token'] = $resultData['token'];
-		$myOptions['tunl_merchantId'] = $resultData['user']['id'];
-		update_option('woocommerce_tunl_settings', $myOptions);
-		$resultingData = array(
-			'status' => true,
-			'message' => 'Your Tunl gateway is connected.',
-			'data' => $resultData,
-		);
+		return wp_send_json($resultingData);
 	}
+
+	/** once authentication process done then save the token and merchantId save */
+
+	// set defaults
+	$myOptions['enabled'] = 'no';
+	$myOptions['title'] = sanitize_text_field(wp_unslash($_POST['tunl_title']));
+	$myOptions['connect_button'] = 2;
+	$myOptions['tunl_token'] = $resultData['token'];
+	$myOptions['tunl_merchantId'] = $resultData['user']['id'];
+	$myOptions['api_mode'] = 'no';
+	$myOptions['live_username'] = $username;
+	$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
+	$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
+
+	if (isset($_POST['tunl_enabled']))
+		$myOptions['enabled'] = 'yes';
+
+	if (isset($_POST['api_mode']) && $_POST['api_mode'] == "yes") {
+		$myOptions['api_mode'] = 'yes';
+		$myOptions['username'] = $username;
+		$myOptions['password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
+		$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
+	}
+
+	update_option('woocommerce_tunl_settings', $myOptions);
+
+	$resultingData = array(
+		'status' => true,
+		'message' => 'Your Tunl gateway is connected.',
+		'data' => $resultData,
+	);
+
 	wp_send_json($resultingData);
 }
 add_action('wp_ajax_tunl_gateway_wc_admin_connect_to_api', 'tunl_gateway_wc_admin_connect_to_api');
@@ -824,135 +753,27 @@ add_action('woocommerce_after_checkout_validation', 'tunl_gateway_checkout_valid
 function tunl_gateway_checkout_validation_unique_error($data, $errors)
 {
 
-	/** Check for any validation errors */
-	if ($data['payment_method'] == 'tunl') {
-		$myOptions = get_option('woocommerce_tunl_settings');
-		if (empty($myOptions['connect_button']) || ($myOptions['connect_button'] == 1)) {
-
-			/** Add a unique custom one */
-			$errors->add('validation', 'Tunl Payment Gateway is not connected. Please contact the merchant for further assistance.');
-		} else {
-			if (empty($_POST['tunl_cardnumber'])) {
-				$errors->add('validation', '<strong>Card Number</strong> is a required field.');
-			}
-			if (empty($_POST['tunl_expirydate'])) {
-				$errors->add('validation', '<strong>Expiration Date</strong> is a required field.');
-			}
-			if (empty($_POST['tunl_cardcode'])) {
-				$errors->add('validation', '<strong>Security Code</strong> is a required field.');
-			}
-			if (!empty($_POST['tunl_cardnumber']) && !empty($_POST['tunl_expirydate']) && !empty($_POST['tunl_cardcode'])) {
-				$username = $myOptions['username'];
-				$password = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_password']);
-				$liveusername = $myOptions['live_username'];
-				$livepassword = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_live_password']);
-
-				if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-					$url = TUNL_LIVE_URL . '/auth';
-					$checkUsername = $liveusername;
-					$checkPassword = $livepassword;
-				} else {
-					$url = TUNL_TEST_URL . '/auth';
-					$checkUsername = $username;
-					$checkPassword = $password;
-				}
-
-				$body = array(
-					'username' => $checkUsername,
-					'password' => $checkPassword,
-					'scope' => 'PAYMENT_WRITE',
-					'lifespan' => 15,
-				);
-
-				/** authentication process with tunl payment api */
-				$response = wp_remote_post($url, array(
-					'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
-					'body' => wp_json_encode($body),
-					'method' => 'POST',
-					'data_format' => 'body',
-				)
-				);
-				$resultData = json_decode($response['body'], true);
-
-				if (isset($resultData['code'])) {
-					$errors->add('validation', '<strong>' . $resultData['message'] . '</strong>');
-				} else {
-					$myOptions['tunl_token'] = $resultData['token'];
-					$auth = $resultData['token'];
-
-					if (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no')) {
-						$url = TUNL_LIVE_URL . '/payments';
-					} else {
-						$url = TUNL_TEST_URL . '/payments';
-					}
-
-					/** once authentication process done then save the token save */
-					update_option('woocommerce_tunl_settings', $myOptions);
-
-				}
-			}
-		}
-	}
-}
-
-function auth_get_token($errors = null)
-{
-
-	$setErrors = isset($errors);
-
 	$myOptions = get_option('woocommerce_tunl_settings');
 
-	$testApiKey = $myOptions['username'];
-	$testSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_password']);
-	$testUrl = TUNL_TEST_URL . '/auth';
-	$liveApiKey = $myOptions['live_username'];
-	$liveSecret = apply_filters('tunl_gateway_decrypt_filter', $myOptions['saved_live_password']);
-	$liveUrl = TUNL_LIVE_URL . '/auth';
-	$prodMode = (empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no'));
+	/** Check for any validation errors */
+	if ($data['payment_method'] !== 'tunl')
+		return;
 
-	$apiKey = $prodMode ? $liveApiKey : $testApiKey;
-	$secret = $prodMode ? $liveSecret : $testSecret;
-	$url = $prodMode ? $liveUrl : $testUrl;
+	if (empty($myOptions['connect_button']) || ($myOptions['connect_button'] == 1))
+		return $errors->add('validation', 'Tunl Payment Gateway is not connected. Please contact the merchant for further assistance.');
 
-	$body = array(
-		'username' => $apiKey,
-		'password' => $secret,
-		'scope' => 'PAYMENT_WRITE',
-		'lifespan' => 15,
-	);
+	if (empty($_POST['tunl_cardnumber']))
+		$errors->add('validation', '<strong>Card Number</strong> is a required field.');
 
-	/** authentication process with tunl payment api */
-	$request = wp_remote_post($url, array(
-		'headers' => array('Content-Type' => 'application/json; charset=utf-8'),
-		'body' => wp_json_encode($body),
-		'method' => 'POST',
-		'data_format' => 'body',
-	)
-	);
+	if (empty($_POST['tunl_expirydate']))
+		$errors->add('validation', '<strong>Expiration Date</strong> is a required field.');
 
-	if (is_wp_error($request)) {
-		// $setErrors ?? $errors->add( 'validation', '<strong>Unknown Wordpress Error</strong>' );
-		throw new Exception(__('Unknown Wordpress Error in Get Auth Token', 'woocommerce'));
-	}
-
-	if (wp_remote_retrieve_response_code($request) == 401) {
-		// $setErrors ?? $errors->add( 'validation', '<strong>Authentication error. Please check your Tunl Tunl API Key/Secret and try again.</strong>' );
-		throw new Exception(__('Authentication error. Please check your Tunl Tunl API Key/Secret and try again.', 'woocommerce'));
-	}
-	// $response = unserialize( wp_remote_retrieve_body( $request ) );
-
-	$resultData = json_decode($request['body'], true);
-
-	$token = $resultData['token'];
-	$tokenSet = isset($token);
-	// !$tokenSet && $setErrors ?? $errors->add( 'validation', '<strong>Tunl is temporarily unavailable. Please try again later.</strong>' );
-	!$tokenSet && throw new Exception(__('Tunl is temporarily unavailable. Please try again later.', 'woocommerce'));
-
-	return $token;
+	if (empty($_POST['tunl_cardcode']))
+		$errors->add('validation', '<strong>Security Code</strong> is a required field.');
 }
 
 /** Show error message if WooCommerce is not installed and/or active */
-function woocommerce_tunl_missing_wc_notice()
+function tunl_gateway_woocommerce_tunl_missing_wc_notice()
 {
 	echo '<div class="error">
 			<p><strong>' . sprintf(
@@ -976,8 +797,7 @@ function tunl_add_plugin_page_settings_link($links)
 	return $returnArray;
 }
 
-/** add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 ); */
-function action_woocommerce_order_refunded($orderId, $refundId)
+function tunl_gateway_action_woocommerce_order_refunded($orderId, $refundId)
 {
 	// just need this function here to complete the refund
 	// This is a No Op Function
@@ -997,13 +817,13 @@ function tunl_gateway_encrypt_key_function($plaintext)
 	$secret_key = $myOptions['secret_key'];
 	$secret_iv = bin2hex(random_bytes(16));
 	// hash
-	$key = hash('sha256', $secret_key);    
+	$key = hash('sha256', $secret_key);
 	// iv - encrypt method AES-256-CBC expects 16 bytes 
 	$iv = substr(hash('sha256', $secret_iv), 0, 16);
 
 	$output = openssl_encrypt($plaintext, $encrypt_method, $key, 0, $iv);
 	$output = $secret_iv . base64_encode($output);
-	
+
 	return $output;
 
 }
@@ -1027,14 +847,14 @@ add_filter('deprecated_tunl_gateway_decrypt_filter', 'deprecated_tunl_gateway_de
 
 function tunl_gateway_decrypt_key_function($ivCiphertextB64)
 {
-	
+
 	$output = false;
 	$encrypt_method = "AES-256-CBC";
 	$myOptions = get_option("woocommerce_tunl_settings");
 	$secret_key = $myOptions['secret_key'];
 	$secret_iv = substr($ivCiphertextB64, 0, 32);
 	// hash
-	$key = hash('sha256', $secret_key);    
+	$key = hash('sha256', $secret_key);
 	// iv - encrypt method AES-256-CBC expects 16 bytes 
 	$iv = substr(hash('sha256', $secret_iv), 0, 16);
 	$cipherText = substr($ivCiphertextB64, 32);
@@ -1057,7 +877,7 @@ function deprecated_tunl_gateway_decrypt_key_function($ivCiphertextB64)
 
 }
 
-function mask($str)
+function tunl_gateway_woocommerce_plugin_mask_secret($str)
 {
 	if (empty($str))
 		return;
