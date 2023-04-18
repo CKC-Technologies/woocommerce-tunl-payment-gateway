@@ -65,17 +65,19 @@ function tunl_gateway_v108_to_v109_upgrade()
 	if (!$currentKey) {
 		$myOptions['secret_encryption_key'] = bin2hex(random_bytes(32));
 		$currentKey = $myOptions['secret_encryption_key'];
+		update_option("woocommerce_tunl_settings", $myOptions);
+	}
 
 		$valuesToFix = ['saved_password', 'saved_live_password'];
 
 		foreach ($valuesToFix as $valueToFix) {
 			$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
+		if ($value === "" || $value === false) continue;
 			$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
 		}
 
 		update_option("woocommerce_tunl_settings", $myOptions);
 	}
-}
 
 /**  Initialize Tunl Class */
 
