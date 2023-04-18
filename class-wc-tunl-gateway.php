@@ -10,8 +10,6 @@ Version: 1.0.14-beta.1
 
 /** Define the Tunl Payment Method Url */
 
-header('Clear-Site-Data: "cache"');
-
 define('TUNL_TEST_URL', 'https://test-api.tunl.com/api');
 define('TUNL_LIVE_URL', 'https://api.tunl.com/api');
 
@@ -39,6 +37,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
  */
 function tunl_gateway_woocommerce_plugin_activate()
 {
+	header('Clear-Site-Data: "cache"');
 	require_once(ABSPATH . '/wp-admin/includes/upgrade.php');
 
 	tunl_gateway_v108_to_v109_upgrade();
@@ -52,7 +51,7 @@ register_activation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_activate');
 function tunl_gateway_woocommerce_plugin_deactivate()
 {
 	/**  Reset the tunl payment method form field */
-	delete_option('woocommerce_tunl_settings');
+	// delete_option('woocommerce_tunl_settings');
 }
 
 register_deactivation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_deactivate');
