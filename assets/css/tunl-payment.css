@@ -26,7 +26,7 @@ a.btn-connected {
 }
 
 .connect-btn-section {
-    display: block;
+    display: inline;
     position: relative;
 }
 
