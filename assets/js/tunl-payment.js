@@ -70,9 +70,7 @@ jQuery(document).ready(function () {
   formInp.append(buttonsAndLoaderSection);
 
   const tokenParent = jQuery("#woocommerce_tunl_tunl_token").parent();
-  const connectedStatus = jQuery(
-    `<a class="btn-connected" >Ready</a>`
-  ).hide();
+  const connectedStatus = jQuery(`<a class="btn-connected" >Ready</a>`).hide();
   const disconnectedStatus = jQuery(`<a >Not Ready</a>`).hide();
 
   tokenParent.append(connectedStatus);
@@ -83,6 +81,20 @@ jQuery(document).ready(function () {
     testModeEnabled ? showSandbox() : showLive();
     showAuthButton();
     tunlConnectBtn.val("1");
+  });
+
+  const inputs = [
+    "#woocommerce_tunl_username",
+    "#woocommerce_tunl_password",
+    "#woocommerce_tunl_live_username",
+    "#woocommerce_tunl_live_password",
+  ];
+
+  inputs.forEach((input) => {
+    jQuery(document).on("input", input, function () {
+      showAuthButton();
+      tunlConnectBtn.val("1");
+    });
   });
 
   const showAuthButton = () =>
@@ -168,7 +180,10 @@ jQuery(document).ready(function () {
   jQuery(document).on("click", ".btn-disconnect-payment", function () {
     const testMode = jQuery("#woocommerce_tunl_api_mode").is(":checked");
     const api_mode = testMode ? "yes" : "no";
-    const data = { action: "tunl_gateway_wc_admin_disconnect_to_api", api_mode };
+    const data = {
+      action: "tunl_gateway_wc_admin_disconnect_to_api",
+      api_mode,
+    };
     post(data, "disconnect");
   });
 });
