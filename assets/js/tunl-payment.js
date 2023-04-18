@@ -28,7 +28,7 @@ jQuery(document).ready(function () {
   const loaderTest = `<img src="${adminAjax.ajaxloader}" class="loader-test-class" />`;
 
   const testTestKeys = `<a class="btn button-primary btn-connect-payment validate-test-keys-btn">Validate Test Keys</a>`;
-  const testLiveKeys = `<a style="margin-bottom: 40px;" class="btn button-primary btn-connect-payment validate-live-keys-btn">Validate Live Keys</a>`;
+  const testLiveKeys = `<a class="btn button-primary btn-connect-payment validate-live-keys-btn">Validate Live Keys</a>`;
 
   const validateLiveButtonElm = jQuery(testLiveKeys);
   const validateTestButtonElm = jQuery(testTestKeys);
@@ -43,13 +43,25 @@ jQuery(document).ready(function () {
   );
   buttonsAndTestLoaderSection.append(validateTestButtonElm);
 
-  const tunlLiveConnectBtn = jQuery("#woocommerce_tunl_live_connect_button");
-  const tunlTestConnectBtn = jQuery("#woocommerce_tunl_test_connect_button");
+  // ==== old code
 
-  const formInpLive = tunlLiveConnectBtn.parents(".forminp");
-  const formInpTest = tunlTestConnectBtn.parents(".forminp");
-  formInpLive.append(buttonsAndLiveLoaderSection);
-  formInpTest.append(buttonsAndTestLoaderSection);
+  // const tunlLiveConnectBtn = jQuery("#woocommerce_tunl_live_connect_button");
+  // const tunlTestConnectBtn = jQuery("#woocommerce_tunl_test_connect_button");
+
+  // const formInpLive = tunlLiveConnectBtn.parents(".forminp");
+  // const formInpTest = tunlTestConnectBtn.parents(".forminp");
+  // formInpLive.append(buttonsAndLiveLoaderSection);
+  // formInpTest.append(buttonsAndTestLoaderSection);
+
+  // ======== start test
+
+  const tunlLiveConnectBtn = jQuery("#woocommerce_tunl_live_password");
+  const tunlTestConnectBtn = jQuery("#woocommerce_tunl_password");
+  tunlLiveConnectBtn.parent().append(buttonsAndLiveLoaderSection);
+  tunlTestConnectBtn.parent().append(buttonsAndTestLoaderSection);
+
+  // =========== end test
+
 
   function showLoader(type) {
     jQuery(`.loader-${type}-class`).show();

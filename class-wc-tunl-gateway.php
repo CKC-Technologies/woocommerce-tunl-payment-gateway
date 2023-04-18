@@ -240,11 +240,11 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'desc_tip' => false,
 			);
 			
-			$arrayfields['test_connect_button'] = array(
-				'title' => __('', 'tunlwoopay'),
-				'type' => 'hidden',
-				'desc_tip' => false,
-			);
+			// $arrayfields['test_connect_button'] = array(
+			// 	'title' => __('', 'tunlwoopay'),
+			// 	'type' => 'hidden',
+			// 	'desc_tip' => false,
+			// );
 
 
 			$this->form_fields = $arrayfields;
