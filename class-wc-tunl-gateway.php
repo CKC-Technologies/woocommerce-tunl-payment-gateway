@@ -68,16 +68,16 @@ function tunl_gateway_v108_to_v109_upgrade()
 		update_option("woocommerce_tunl_settings", $myOptions);
 	}
 
-		$valuesToFix = ['saved_password', 'saved_live_password'];
+	$valuesToFix = ['saved_password', 'saved_live_password'];
 
-		foreach ($valuesToFix as $valueToFix) {
-			$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
+	foreach ($valuesToFix as $valueToFix) {
+		$value = apply_filters('deprecated_tunl_gateway_decrypt_filter', $myOptions[$valueToFix]);
 		if ($value === "" || $value === false) continue;
-			$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
-		}
-
-		update_option("woocommerce_tunl_settings", $myOptions);
+		$myOptions[$valueToFix] = apply_filters('tunl_gateway_encrypt_filter', $value);
 	}
+
+	update_option("woocommerce_tunl_settings", $myOptions);
+}
 
 /**  Initialize Tunl Class */
 
@@ -699,10 +699,6 @@ function tunl_gateway_wc_admin_connect_to_api()
 	$myOptions['connect_button'] = 2;
 	$myOptions['tunl_token'] = $resultData['token'];
 	$myOptions['tunl_merchantId'] = $resultData['user']['id'];
-	$myOptions['api_mode'] = 'no';
-	$myOptions['live_username'] = $username;
-	$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
-	$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
 
 	if (isset($_POST['tunl_enabled']))
 		$myOptions['enabled'] = 'yes';
@@ -712,6 +708,11 @@ function tunl_gateway_wc_admin_connect_to_api()
 		$myOptions['username'] = $username;
 		$myOptions['password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
 		$myOptions['saved_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
+	}else{
+		$myOptions['api_mode'] = 'no';
+		$myOptions['live_username'] = $username;
+		$myOptions['live_password'] = tunl_gateway_woocommerce_plugin_mask_secret($password);
+		$myOptions['saved_live_password'] = apply_filters('tunl_gateway_encrypt_filter', $password);
 	}
 
 	update_option('woocommerce_tunl_settings', $myOptions);
