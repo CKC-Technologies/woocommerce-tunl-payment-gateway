@@ -30,7 +30,7 @@ a.btn-connected {
     position: relative;
 }
 
-img.loader-connect-class {
+img.loader-test-class, img.loader-live-class {
     height: 25px;
     position: absolute;
     left: 3%;
