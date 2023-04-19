@@ -5,12 +5,12 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.13
+Version: 1.0.14
 */
 
 /** Define the Tunl Payment Method Url */
 
-header('Clear-Site-Data: "cache"');
+
 
 define('TUNL_TEST_URL', 'https://test-api.tunl.com/api');
 define('TUNL_LIVE_URL', 'https://api.tunl.com/api');
@@ -40,7 +40,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 function tunl_gateway_woocommerce_plugin_activate()
 {
 	require_once(ABSPATH . '/wp-admin/includes/upgrade.php');
-
+	header('Clear-Site-Data: "cache"');
 	tunl_gateway_v108_to_v109_upgrade();
 }
 
@@ -52,7 +52,7 @@ register_activation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_activate');
 function tunl_gateway_woocommerce_plugin_deactivate()
 {
 	/**  Reset the tunl payment method form field */
-	delete_option('woocommerce_tunl_settings');
+	// delete_option('woocommerce_tunl_settings');
 }
 
 register_deactivation_hook(__FILE__, 'tunl_gateway_woocommerce_plugin_deactivate');
@@ -682,8 +682,8 @@ function tunl_gateway_wc_admin_connect_to_api()
 	/** Authentication process with tunl payment api */
 	$resultData = json_decode($response['body'], true);
 	if (!isset($resultData['token'])) {
-		$testMsg = "Your Test Keys are invalid.";
-		$liveMsg = "Your Live Keys are invalid.";
+		$testMsg = "Validation failed. Please check your test API Key & Secret and try again."; 
+		$liveMsg = "Validation failed. Please check your live API Key & Secret and try again."; 
 		$message = $prodMode ? $liveMsg : $testMsg;
 		$resultingData = array(
 			'status' => false,
@@ -694,9 +694,10 @@ function tunl_gateway_wc_admin_connect_to_api()
 	}
 
 
-	$testMsg = "Your Test Keys are working.";
-	$liveMsg = "Your Live Keys are working.";
-	$message = $prodMode ? $liveMsg : $testMsg;
+	// $testMsg = "Your Test Keys are working.";
+	// $liveMsg = "Your Live Keys are working.";
+	// $message = $prodMode ? $liveMsg : $testMsg;
+	$message = "Validation Successful.";
 
 	$resultingData = array(
 		'status' => true,

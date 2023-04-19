@@ -3,7 +3,7 @@ Contributors: tunl
 Tags: credit card, credit card processing, ecommerce, gateway, gateway integration, merchant account, payment, payment gateway, payment processing, payments, processing, tunl, woocommerce
 Requires at least: 6.1.1
 Tested up to: 6.1.1
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

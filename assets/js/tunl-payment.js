@@ -28,7 +28,7 @@ jQuery(document).ready(function () {
   const loaderTest = `<img src="${adminAjax.ajaxloader}" class="loader-test-class" />`;
 
   const testTestKeys = `<a class="btn button-primary btn-connect-payment validate-test-keys-btn">Validate Test Keys</a>`;
-  const testLiveKeys = `<a style="margin-bottom: 40px;" class="btn button-primary btn-connect-payment validate-live-keys-btn">Validate Live Keys</a>`;
+  const testLiveKeys = `<a style="margin-bottom: 20px;" class="btn button-primary btn-connect-payment validate-live-keys-btn">Validate Live Keys</a>`;
 
   const validateLiveButtonElm = jQuery(testLiveKeys);
   const validateTestButtonElm = jQuery(testTestKeys);
