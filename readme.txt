@@ -27,8 +27,8 @@ Download and install the *Tunl Payment Gateway* plugin to accept credit card pay
 
 * Tunl Merchant Account
 Don’t have a Tunl account yet? Contact [sales@tunl.com](mailto:sales@tunl.com) to get started today!
-* WordPress Version 6.1.1 (not tested with earlier versions)
-* WooCommerce Version 7.5.0 (not tested with earlier versions)
+* WordPress Version 6.1.1 or later (not tested with earlier versions)
+* WooCommerce Version 7.5.0 or later (not tested with earlier versions)
 
 == Installation ==
 
@@ -43,7 +43,7 @@ You will use this set of keys to authenticate your account in the plugin.
 
 = Configuration =
 
-Configuring your plugin is quick and easy. Simply copy and paste your Tunl keys into your plugin *Settings*. Make sure that Tunl is enabled and *Test Mode* is disabled to begin accepting live payments.
+Configuring your plugin is quick and easy. Simply copy and paste your Tunl keys into your plugin *Settings* page. Make sure that the *Enable Tunl* box is checked and the *Test Mode* box is unchecked. Click *Save changes*, and you are ready to accept live payments!
 **NOTE:** If you have a demo account, you can process a test transaction by enabling *Test Mode* and authenticating your test keys.
 Having issues? Contact Tunl’s support team at [support@tunl.com](mailto:support@tun.com).
 
@@ -59,16 +59,16 @@ For general support, contact the Tunl support team at [support@tunl.com](mailto:
 
 = Is an SSL certificate required? =
 
-Yes, a valid SSL certificate must be installed on your site to ensure that your customers' information is secured and your site is PCI compliant.
+Yes, a valid SSL certificate must be installed on your site to ensure that your customers' data is secured and your site is PCI compliant.
 
 == Screenshots ==
 
 1. The Tunl Payment Gateway plugin allows your customer to complete their payment without ever leaving your site.
-2. Automatically process refunds from your WordPress dashboard with the Tunl plugin.
-3. Create your API & Secret keys on the Settings page of your Tunl Merchant Account.
-4. Configure your Tunl Payment Gateway plugin by authenticating your API & Secret keys in the Settings page.
+2. Automatically process refunds directly from your WordPress dashboard with the Tunl plugin.
+3. Create your API & Secret keys on the Settings page of your Tunl dashboard.
+4. From the Tunl plugin's *Settings* page, configure your plugin by entering your API & Secret keys. Validate them to make sure they work, and simply click *Save changes*. All done!
 
 == Changelog ==
 
-= v1.0 - 03/20/2023 =
+= v1.0.15 - 04/20/2023 =
 * First Release
