@@ -198,7 +198,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				'title' => __('Title', 'tunlwoopay'),
 				'type' => 'text',
 				'description' => __('Enter the payment method name to appear on the checkout page.', 'tunlwoopay'),
-				'default' => __('Credit Cards via Tunl', 'tunlwoopay'),
+				'default' => __('Credit Card via Tunl', 'tunlwoopay'),
 				'desc_tip' => true,
 			);
 			$arrayfields['live_username'] = array(
