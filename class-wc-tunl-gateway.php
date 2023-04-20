@@ -405,7 +405,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 
 			$prodMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
 			$apiUrl = $prodMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
-
+	
 			$auth = $this->auth_get_token();
 
 			/** Get the payment details using tunl payment api */
@@ -509,7 +509,14 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$gettotaltax = $order->get_total_tax();
 			$orderaddress = $addressorder . ', ' . $country . ', ' . $state . ', ' . $city;
 			$myOptions = get_option('woocommerce_tunl_settings');
-			$auth = $this->auth_get_token();
+
+			try {
+				$auth = $this->auth_get_token();
+			}
+			catch (exception $e) {
+				error_log($e);
+				throw new Exception(__('Tunl gateway cannot be authenticated. Please contact the merchant for further assistance.', 'woocommerce'));
+			}
 
 			$prodMode = empty($myOptions['api_mode']) || ($myOptions['api_mode'] == 'no');
 			$apiUrl = $prodMode ? TUNL_LIVE_URL : TUNL_TEST_URL;
