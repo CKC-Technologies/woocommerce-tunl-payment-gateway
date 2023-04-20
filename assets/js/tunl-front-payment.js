@@ -1,10 +1,12 @@
 jQuery(document).ready(function($){
 
-
+    let currentVal = 0;
     $(document).on("change input","#tunl_ccno",function() { 
         
-        jQuery('.card-input-img').remove();
         var getInputFirst = parseInt($(this).val().charAt(0));
+        if (getInputFirst === currentVal) return;
+        jQuery('.card-input-img').remove();
+        currentVal = getInputFirst;
         var imageSet = '';
         if( getInputFirst == 3 ){
             imageSet = '<img src="'+cardDetail.cardfolder+'/amex.svg" class="card-input-img">';
