@@ -277,7 +277,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				sprintf(
 					__('<label>Card Number <span class="required">*</span></label>
 							<div class="card_number_input">
-							<input id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
+							<input placeholder="0000 0000 0000 0000" id="tunl_ccno" type="text" autocomplete="off" class="input-text" name="tunl_cardnumber">
 							</div>')
 				),
 				$wp_kses_whitelist
