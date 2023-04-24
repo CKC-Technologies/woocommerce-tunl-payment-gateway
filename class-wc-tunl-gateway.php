@@ -574,7 +574,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			$resultData = json_decode($response['body'], true);
 
 			/** Once Payment is complete and success then save paymentID ( ttid ) */
-			if ($resultData['phardcode'] == 'SUCCESS') {
+			if ($resultData['code'] != 'PaymentException') {
 				$order->payment_complete();
 
 				update_post_meta($orderid, 'tunl_paymentid', $resultData['ttid']);
