@@ -70,5 +70,5 @@ Yes, a valid SSL certificate must be installed on your site to ensure that your 
 
 == Changelog ==
 
-= v1.0.16 - 04/20/2023 =
+= v1.0.18 - 05/01/2023 =
 * First Release
