@@ -369,6 +369,19 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			return $token;
 		}
 
+		function sanitize_tax_array($jsonString = ""){
+			$taxArray = json_decode($jsonString, true);
+			if (!is_array($taxArray)) return 0;
+		
+			$refundSumsArray = array_map(function($refundArray){
+				if (!is_array($refundArray)) return 0;
+				$sanitizedArray = array_filter($refundArray, 'is_numeric');
+				return array_sum($sanitizedArray);
+			}, $taxArray);
+			
+			return array_sum($refundSumsArray);
+		}
+
 		/**
 		 * When place order complete then function work
 		 *
@@ -380,7 +393,6 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			if (empty($_POST['refund_amount']))
 				return false;
 
-			$taxTotals = array();
 			$taxRefund = 0;
 			$totalAmountRefund = floatval(sanitize_text_field($_POST['refund_amount']));
 			$setReason = '';
@@ -389,11 +401,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 				$setReason = sanitize_text_field(wp_unslash($_POST['refund_reason']));
 
 			if ($_POST['line_item_tax_totals'])
-				$taxTotals = json_decode($_POST['line_item_tax_totals'], true);
-
-			foreach ($taxTotals as $single_item) {
-				$taxRefund = $taxRefund + array_sum($single_item);
-			}
+				$taxRefund = $this->sanitize_tax_array($_POST['line_item_tax_totals']);
 
 			$tunlPaymentId = get_post_meta($orderId, 'tunl_paymentid');
 			$checkPayment = get_post_meta($orderId, 'check_tunlpayment');
