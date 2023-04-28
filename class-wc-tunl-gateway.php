@@ -5,7 +5,7 @@ Plugin URI: https://merchant.tunl.com/session/signin
 Description: Accept credit card payments on your WooCommerce store using the Tunl payment gateway.
 Author: Tunl
 Author URI: https://www.tunl.com
-Version: 1.0.18
+Version: 1.0.19
 */
 
 /** Define the Tunl Payment Method Url */
@@ -370,7 +370,8 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 		}
 
 		function sanitize_tax_array($jsonString = ""){
-			$taxArray = json_decode($jsonString, true);
+			$unslashed = wp_unslash($jsonString);
+			$taxArray = json_decode($unslashed, true);
 			if (!is_array($taxArray)) return 0;
 		
 			$refundSumsArray = array_map(function($refundArray){
@@ -429,7 +430,7 @@ function tunl_gateway_initialize_woocommerce_gateway_class()
 			);
 
 			$resutData = json_decode($response['body'], true);
-
+			
 			$body = array(
 				'accountId' => $resutData['contactAccount']['id'],
 				'contactId' => $resutData['contact']['id'],
