@@ -64,11 +64,11 @@ Yes, a valid SSL certificate must be installed on your site to ensure that your 
 == Screenshots ==
 
 1. The Tunl Payment Gateway plugin allows your customer to complete their payment without ever leaving your site.
-2. Automatically process refunds directly from your WordPress dashboard with the Tunl plugin.
+2. Automatically process refunds directly from your WordPress dashboard with WooCommerce and the Tunl plugin.
 3. Create your API & Secret keys on the Settings page of your Tunl dashboard.
 4. From the Tunl plugin's *Settings* page, configure your plugin by entering your API & Secret keys. Validate them to make sure they work, and simply click *Save changes*. All done!
 
 == Changelog ==
 
-= v1.0.18 - 05/01/2023 =
+= v1.0.19 - 05/01/2023 =
 * First Release
